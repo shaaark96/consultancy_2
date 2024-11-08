@@ -1,0 +1,245 @@
+/* 1st Container - Header and Theme-Mode */
+.first_container {
+    width: 90%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 3px;
+    padding-bottom: 1px;
+    padding-left: 20px;
+    box-sizing: border-box;
+}
+/* Container für Header (H1 und H4) */
+.header {
+    display: flex;
+    align-items: center;
+    gap: 360px; /* Abstand zwischen H1 und H4 */
+}
+/* Dropdown für Theme-Mode */
+.theme_dropdown {
+    width: 220%;
+    font-size: 14px;
+}
+/* ------------------- */
+/* Split Layout in three columns */
+.dash_container {
+    display: flex;
+    flex-direction: row;
+    width: 90%;
+    gap: 1px;
+    box-sizing: border-box;
+    padding-bottom: 10px;
+}
+/* Erste Spalte */
+.first_column {
+    flex: 0 0 25%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+/* Zweite Spalte */
+.second_column {
+    flex: 0 0 37.5%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+/* Dritte Spalte */
+.third_column {
+    flex: 0 0 37.5%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+/* ------------------- */
+/* 2nd Container - Input City */
+.second_container {
+    display: block;
+    align-items: center;
+    border: 1px solid darkgrey;
+    border-radius: 5px;
+    padding: 10px;
+    gap: 2px;
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+.dropdown {
+    width: 100%;
+    font-size: 14px;
+    cursor: pointer;
+}
+.dash-dropdown .Select-placeholder {
+    font-family: Arial, sans-serif;
+    font-style: normal;
+    font-size: 14px;
+}
+/* ------------------- */
+/* 3rd Container - Input Visualization Type */
+.third_container {
+    display: block;
+    align-items: center;
+    border: 1px solid darkgrey;
+    border-radius: 5px;
+    padding: 10px;
+    gap: 2px;
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+.button_viz_type {
+    display: flex;
+    gap: 1px;
+    justify-content: left;
+    border-radius: 5px;
+}
+.viz_button {
+    padding: 3px 3px;
+    width: 80px;
+    font-size: 12px;
+    border: 1px solid darkgrey;
+    border-radius: 5px;
+    margin: 2px;
+}
+.viz_button:hover {
+    background-color: #e0e0e0;
+    cursor: pointer;
+}
+.viz_button.active {
+    background-color: #0000FFFF;
+    color: white;
+    border: 1px solid blue;
+}
+/* ------------------- */
+/* 4th Container - KPI-Table */
+.fourth_container {
+    display: block;
+    align-items: center;
+    border: 1px solid darkgrey;
+    border-radius: 5px;
+    padding: 10px;
+    gap: 2px;
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-top: 5px;
+    padding-bottom: 10px;
+    box-sizing: border-box;
+}
+/* ------------------- */
+/* 5th Container - Color Map */
+.fifth_container {
+    align-items: center;
+    border: 1px solid darkgrey;
+    border-radius: 5px;
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+/* ------------------- */
+/* 6th Container - Grey Map */
+.sixth_container {
+    align-items: center;
+    border: 1px solid darkgrey;
+    border-radius: 5px;
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+/* 7th Container - Histogram */
+.seventh_container {
+    display: block;
+    align-items: center;
+    border: 1px solid darkgrey;
+    border-radius: 5px;
+    padding: 10px;
+    gap: 2px;
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+/* ------------------- */
+/* Theme-Mode */
+.light_theme {
+    background-color: white;
+    color: black;
+}
+.dark_theme {
+    background-color: #454a59;
+    color: white;
+}
+html, body {
+    background-color: inherit;
+    color: inherit;
+}
+.header, .first_container, .second_container, .third_container, .fourth_container,
+.fifth_container, .sixth_container, .seventh_container, .dash_container {
+    background-color: inherit;
+    color: inherit;
+}
+/* Dropdown für Theme-Mode */
+/* Überschreiben der Standardklasse von Dash */
+.light_theme .dash-dropdown,
+.light_theme .dash-dropdown .Select-control,
+.light_theme .dash-dropdown .Select-menu-outer {
+    background-color: white !important;
+    color: black !important;
+}
+.dark_theme .dash-dropdown,
+.dark_theme .dash-dropdown .Select-control,
+.dark_theme .dash-dropdown .Select-menu-outer {
+    background-color: #485260 !important;
+    color: white !important;
+}
+/* Schriftfarbe für den ausgewählten Wert im Light Theme */
+.light_theme .dash-dropdown .Select-placeholder,
+.light_theme .dash-dropdown .Select-value-label {
+    color: black !important;
+}
+/* Schriftfarbe für den ausgewählten Wert im Dark Theme */
+.dark_theme .dash-dropdown .Select-placeholder,
+.dark_theme .dash-dropdown .Select-value-label {
+    color: white !important;
+}
+/* ------------------- */
+/* Font Style */
+h1 {
+    font-size: 24px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    text-align: left;
+    /* margin-bottom: 12px; */
+}
+h2 {
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    font-weight: normal;
+    text-align: left;
+    /* margin-bottom: 12px; */
+}
+h3 {
+    font-size: 12px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    text-align: left;
+    /* margin-bottom: 12px; */
+}
+h4 {
+    font-size: 12px;
+    font-weight: lighter;
+    font-style: italic;
+    margin-top: 10px;
+}
+p {
+    font-size: 12px;
+    font-family: Arial, sans-serif;
+    font-weight: normal;
+    text-align: left;
+    margin-top: 6px;
+    margin-bottom: 1px;
+    margin-left: 12px;
+}
