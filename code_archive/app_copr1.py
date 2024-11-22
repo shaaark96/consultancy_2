@@ -15,7 +15,7 @@ Section 1:
 Data Import and Preparation
 """
 # Data reading:
-data_path = 'assets/all_fixation_data_cleaned_up.csv'
+data_path = r'C:\Users\pelle\Documents\GitHub\consultancy_2\assets\all_fixation_data_cleaned_up.csv'
 df = pd.read_csv(data_path, sep=';')
 
 # Add "Task Duration in sec" (per User and Stimulus) to df:
