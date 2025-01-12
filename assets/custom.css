@@ -4,14 +4,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 3px;
+    padding-top: 6px;
     padding-bottom: 1px;
-    padding-left: 20px;
+    padding-left: 10px;
     box-sizing: border-box;
 }
 /* Container für Header (H1 und H4) */
 .header {
     display: flex;
+    background-color: #aa503c;
     align-items: center;
     gap: 360px; /* Abstand zwischen H1 und H4 */
 }
@@ -162,6 +163,34 @@
     margin-top: 5px;
     box-sizing: border-box;
 }
+/* 8th Container - Histogram */
+.eighth_container {
+    display: block;
+    align-items: center;
+    border: 1px solid darkgrey;
+    border-radius: 5px;
+    padding: 10px;
+    gap: 2px;
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+/* 9th Container - Histogram */
+.ninth_container {
+    display: block;
+    align-items: center;
+    border: 1px solid darkgrey;
+    border-radius: 5px;
+    padding: 10px;
+    gap: 2px;
+    margin-left: 3px;
+    margin-right: 3px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+
+
 /* ------------------- */
 /* Theme-Mode */
 .light_theme {
@@ -173,7 +202,7 @@
     color: white;
 }
 html, body {
-    background-color: inherit;
+    background-color: #e3f2fd;
     color: inherit;
 }
 .header, .first_container, .second_container, .third_container, .fourth_container,
@@ -242,4 +271,49 @@ p {
     margin-top: 6px;
     margin-bottom: 1px;
     margin-left: 12px;
+}
+#selected_n_clusters_color {
+    border: 2px solid #007bff; /* Blue border */
+    border-radius: 5px;       /* Rounded corners */
+    padding: 10px;           /* Inner padding */
+    font-size: 14px;         /* Font size */
+    color: #333;             /* Text color */
+    background-color: #f9f9f9; /* Light gray background */
+    width: 100%;            /* Set width */
+}
+
+/* Add hover effect */
+#selected_n_clusters_color:hover {
+    border-color: #0056b3;   /* Darker blue on hover */
+    background-color: #e9f5ff; /* Light blue background on hover */
+}
+
+/* Add focus effect */
+#selected_n_clusters_color:focus {
+    outline: none;           /* Remove default outline */
+    border-color: #0056b3;   /* Darker blue on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add shadow on focus */
+}
+
+#selected_n_clusters_grey {
+    border: 2px solid #007bff; /* Blue border */
+    border-radius: 5px;       /* Rounded corners */
+    padding: 10px;           /* Inner padding */
+    font-size: 14px;         /* Font size */
+    color: #333;             /* Text color */
+    background-color: #f9f9f9; /* Light gray background */
+    width: 100%;            /* Set width */
+}
+
+/* Add hover effect */
+#selected_n_clusters_grey:hover {
+    border-color: #0056b3;   /* Darker blue on hover */
+    background-color: #e9f5ff; /* Light blue background on hover */
+}
+
+/* Add focus effect */
+#selected_n_clusters_grey:focus {
+    outline: none;           /* Remove default outline */
+    border-color: #0056b3;   /* Darker blue on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add shadow on focus */
 }

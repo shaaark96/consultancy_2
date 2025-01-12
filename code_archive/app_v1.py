@@ -1,11 +1,11 @@
 from dash import Dash, dash_table, dcc, html, Input, Output, State, callback_context
 from dash_iconify import DashIconify
-from PIL import  Image, ImageDraw, ImageFilter
+from PIL import Image
 import dash_bootstrap_components as dbc
 import pandas as pd
 import plotly.express as px
 import glob
-from sklearn.cluster import KMeans, MeanShift, HDBSCAN
+from sklearn.cluster import KMeans
 import plotly.graph_objects as go
 import numpy as np
 from scipy.spatial import ConvexHull
@@ -18,7 +18,7 @@ Section 1:
 Data Import and Preparation
 """
 # Data reading:
-data_path = 'assets/all_fixation_data_cleaned_up.csv'
+data_path = '../assets/all_fixation_data_cleaned_up.csv'
 df = pd.read_csv(data_path, sep=';')
 
 # Add "Task Duration in sec" (per User and Stimulus) to df:
@@ -46,7 +46,7 @@ Section 2:
 Definition of Dash Layout
 """
 app.layout = html.Div([
-    # Header and Theme-Mode
+    # Header and Theme-Mode:
     html.Div([
         html.Div([
             html.H1('Analysis of Eye-Tracking-Data'),
@@ -56,8 +56,7 @@ app.layout = html.Div([
             id='theme_dropdown',
             options=[
                 {'label': 'Light Mode', 'value': 'light'},
-                {'label': 'Dark Mode', 'value': 'dark'}
-            ],
+                {'label': 'Dark Mode', 'value': 'dark'}],
             value='light',
             clearable=False,
             className='theme_dropdown',
@@ -66,43 +65,43 @@ app.layout = html.Div([
     ], className='first_container'),
 
     html.Div([
-        # First column: Input, KPI, Histogram
+        # Start first column (Input, KPI, Histogram):
         html.Div([
-            # Visualization Type Buttons
+            # Input-Containers:
             html.Div([
-                html.H3([
-                    DashIconify(icon="ion:bar-chart", width=16, height=16, style={"margin-right": "12px"}),
-                    'Choose a Type of Visualization']),
+                # Visualization Type Buttons:
                 html.Div([
-                    html.Button('Boxplot', id='default_viz', n_clicks=0, className='viz_button'),
-                    html.Button('Heat Map', id='heat_map', n_clicks=0, className='viz_button'),
-                    html.Button('Gazeplot', id='gaze_plot', n_clicks=0, className='viz_button'),
-                    html.Button('Correlation', id='scatter_plot', n_clicks=0, className='viz_button'),
-                    html.Button('Cluster Analysis', id='cluster_analysis', n_clicks=0, className='viz_button'),
-                    html.Button('Cluster Analysis Color', id='cluster_analysis_map_color', n_clicks=0, className='viz_button'),
-                    html.Button('Cluster Analysis Grey', id='cluster_analysis_map_grey', n_clicks=0, className='viz_button'),
-                    html.Button('Opacity Map', id='opacity_map', n_clicks=0, className='viz_button'),
-                ], id='button_viz_type', className='button_viz_type'),
-                dcc.Store(id='active-button', data='default_viz'),
-                html.Div(id='output-section'),
-            ], className='third_container'),
+                    html.H3([
+                        DashIconify(icon="ion:bar-chart", width=16, height=16, style={"margin-right": "12px"}),
+                        'Choose a Type of Visualization']),
+                    html.Div([
+                        html.Button('Boxplot', id='default_viz', n_clicks=0, className='viz_button'),
+                        html.Button('Heat Map', id='heat_map', n_clicks=0, className='viz_button'),
+                        html.Button('Gazeplot', id='gaze_plot', n_clicks=0, className='viz_button'),
+                        html.Button('Correlation', id='scatter_plot', n_clicks=0, className='viz_button'),
+                        html.Button('Cluster Analysis', id='cluster_analysis', n_clicks=0, className='viz_button'),
+                        html.Button('Opacity Map', id='opacity_map', n_clicks=0, className='viz_button'),
+                    ], id='button_viz_type', className='button_viz_type'),
+                    dcc.Store(id='active-button', data='default_viz'),
+                    html.Div(id='output-section'),
+                ], className='third_container'),
+            ], className='input_container'),
 
-            # City Selection Dropdown
-            html.Div([
-                html.H3([
+                # City Dropdown:
+                html.Div([
+                    html.H3([
                         DashIconify(icon="vaadin:train", width=16, height=16, style={"margin-right": "12px"}),
                         'Choose a City to explore in detail']),
-                dcc.Dropdown(
-                    id='city_dropdown',
-                    options=[{'label': city, 'value': city} for city in sorted(df['CityMap'].unique())],
-                    placeholder='Select a City Map...',
-                    value=None,
-                    clearable=True,
-                    className='dropdown'
-                ),
-            ], className='second_container'),
+                    dcc.Dropdown(
+                        id='city_dropdown',
+                        options=[{'label': city, 'value': city} for city in sorted(df['CityMap'].unique())],
+                        placeholder='Select a City Map...',
+                        value=None,
+                        clearable=True,
+                        className='dropdown'),
+                ], className='second_container'),
 
-            # KPI Table
+            # Output-Container KPI-Table:
             html.Div([
                 html.H3([
                     DashIconify(icon="fluent:arrow-trending-lines-24-filled", width=16, height=16,
@@ -111,16 +110,18 @@ app.layout = html.Div([
                 html.Div(id='table_container')
             ], className='fourth_container'),
 
-            # Histogram
+            # Output-Container Histogram:
             html.Div([
-                dcc.Graph(id='hist_taskduration'),
+                dcc.Graph(id='hist_taskduration'), #style={"height": "150px"}),
             ], className='seventh_container'),
         ], className='first_column'),
 
-        # Second column: Color Map
+        # Start second column (Color Map):
         html.Div([
+            # Output-Container Color Plot:
             html.Div([
-                html.Img(id='city_image_color'),
+                html.Img(
+                    id='city_image_color'),
                 dcc.Graph(id='gaze_plot_color'),
                 dcc.Graph(id='heat_map_color'),
                 dcc.Dropdown(id='dropdown_user_color', multi=True),
@@ -128,35 +129,25 @@ app.layout = html.Div([
                                 marks={i: f'{i}' for i in range(0, 51, 5)}),
                 dcc.Graph(id='box_task_duration'),
                 dcc.Graph(id='scatter_correlation_color'),
-                dcc.Graph(id='cluster_analysis_color'),
-                dcc.Graph(id='scarf_plot_color'),
-                dcc.Graph(id='opacity_map_color'),
-                dcc.Graph(id='cluster_analysis_map_color_1'),
-                dcc.Graph(id='cluster_analysis_map_grey_1'),
-                dcc.Input(id='selected_n_clusters_color'),
-                dcc.Dropdown(id='selected_aoi_type_color'),
+                dcc.Graph(id='cluster_analysis_color')
             ], id='color_plot_area', className='fifth_container'),
         ], className='second_column'),
 
-        # Third column: Grey Map
+        # Start third column (Grey Map):
         html.Div([
+            # Output-Container Grey Plot:
             html.Div([
-                html.Img(id='city_image_grey'),
+                html.Img(
+                    id='city_image_grey'),
                 dcc.Graph(id='gaze_plot_grey'),
                 dcc.Graph(id='heat_map_grey'),
                 dcc.Dropdown(id='dropdown_user_grey', multi=True),
                 dcc.RangeSlider(id='range_slider_grey', min=1, max=50, step=1, value=[1, 50],
-                                marks={i: f'{i}' for i in range(0, 51, 5)}),
+                                marks = {i: f'{i}' for i in range(0, 51, 5)}),
                 dcc.Graph(id='box_avg_fix_duration'),
                 dcc.Graph(id='scatter_correlation_grey'),
-                dcc.Graph(id='cluster_analysis_grey'),
-                dcc.Graph(id='scarf_plot_grey'),
-                dcc.Graph(id='opacity_map_grey'),
-                dcc.Graph(id='cluster_analysis_map_color_2'),
-                dcc.Graph(id='cluster_analysis_map_grey_2'),
-                dcc.Input(id='selected_n_clusters_grey'),
-                dcc.Dropdown(id='selected_aoi_type_grey')
-            ], id='grey_plot_area', className='sixth_container'),
+                dcc.Graph(id='cluster_analysis_grey')
+            ],  id='grey_plot_area', className='sixth_container'),
         ], className='third_column'),
     ], className='dash_container'),
 ], id='page_content', className='light_theme')
@@ -173,22 +164,16 @@ Definition of Interaction Elements
      Output('gaze_plot', 'className'),
      Output('scatter_plot', 'className'),
      Output('cluster_analysis', 'className'),
-    Output('opacity_map', 'className'),
-    Output('cluster_analysis_map_color', 'className'),
-    Output('cluster_analysis_map_grey', 'className'),
      Output('active-button', 'data')],
     [Input('default_viz', 'n_clicks'),
      Input('heat_map', 'n_clicks'),
      Input('gaze_plot', 'n_clicks'),
      Input('scatter_plot', 'n_clicks'),
-     Input('cluster_analysis', 'n_clicks'),
-     Input('opacity_map', 'n_clicks'),
-     Input('cluster_analysis_map_color', 'n_clicks'),
-     Input('cluster_analysis_map_grey', 'n_clicks')],
+     Input('cluster_analysis', 'n_clicks')],
     [State('active-button', 'data')]
 )
 
-def update_active_button(btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, active_btn):
+def update_active_button(btn1, btn2, btn3, btn4, btn5, active_btn):
     ctx = callback_context
     button_id = ctx.triggered[0]['prop_id'].split('.')[0] if ctx.triggered else 'default_viz'
     return [
@@ -197,9 +182,6 @@ def update_active_button(btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, active_
         'viz_button active' if button_id == 'gaze_plot' else 'viz_button',
         'viz_button active' if button_id == 'scatter_plot' else 'viz_button',
         'viz_button active' if button_id == 'cluster_analysis' else 'viz_button',
-        'viz_button active' if button_id == 'opacity_map' else 'viz_button',
-        'viz_button active' if button_id == 'cluster_analysis_map_color' else 'viz_button',
-        'viz_button active' if button_id == 'cluster_analysis_map_grey' else 'viz_button',
         button_id
     ]
 
@@ -219,12 +201,6 @@ def update_output(active_button):
         return 'The scatter plot provides a correlation analysis between different variables.'
     elif active_button == 'cluster_analysis':
         return 'Cluster analysis helps identify patterns by grouping similar data points together.'
-    elif active_button == 'opacity_map':
-        return 'Opacity map eye tracking involves using varying levels of transparency in a visual overlay to guide and analyze gaze patterns on a screen or interface.'
-    elif active_button == 'cluster_analysis_map_color':
-        return 'Cluster analysis helps identify patterns by grouping similar data points together'
-    elif active_button == 'cluster_analysis_map_grey':
-        return 'Cluster analysis helps identify patterns by grouping similar data points together'
     else:
         return 'Select a visualization type to see its details here.'
 
@@ -237,26 +213,22 @@ def update_output(active_button):
      Input('city_dropdown', 'value')]
 )
 def update_plot_area(visualization_type, selected_city):
-    if visualization_type in ['gaze_plot', 'heat_map', 'opacity_map']:
+    if visualization_type in ['gaze_plot', 'heat_map']:
         min_val_color, max_val_color, value_range_color, marks_color = update_range_slider_color(selected_city)
         min_val_grey, max_val_grey, value_range_grey, marks_grey = update_range_slider_grey(selected_city)
 
         return [
             dcc.Graph(id=f'{visualization_type}_color'),
-            dcc.Dropdown(id='dropdown_user_color', value=None, multi=True, placeholder='Filter by User(s)...'),
-            html.P('Filter by Task Duration:'),
-            dcc.RangeSlider(
-                id='range_slider_color',
-                min=min_val_color, max=max_val_color, value=value_range_color, marks=marks_color
-            )
+            dcc.Dropdown(id='dropdown_user_color', value=None, multi=True, placeholder='filter by User(s)...'),
+            html.P('filter by Task Duration:'),
+            dcc.RangeSlider(id='range_slider_color',
+                            min=min_val_color, max=max_val_color, value=value_range_color, marks=marks_color)
         ], [
             dcc.Graph(id=f'{visualization_type}_grey'),
-            dcc.Dropdown(id='dropdown_user_grey', value=None, multi=True, placeholder='Filter by User(s)...'),
-            html.P('Filter by Task Duration:'),
-            dcc.RangeSlider(
-                id='range_slider_grey',
-                min=min_val_grey, max=max_val_grey, value=value_range_grey, marks=marks_grey
-            )
+            dcc.Dropdown(id='dropdown_user_grey', value=None, multi=True, placeholder='filter by User(s)...'),
+            html.P('filter by Task Duration:'),
+            dcc.RangeSlider(id='range_slider_grey',
+                            min=min_val_grey, max=max_val_grey, value=value_range_grey, marks=marks_grey)
         ]
     elif visualization_type == 'scatter_plot':
         return [
@@ -264,13 +236,12 @@ def update_plot_area(visualization_type, selected_city):
         ], [
             dcc.Graph(id='scatter_correlation_grey')
         ]
-    elif visualization_type == 'cluster_analysis':
+    elif visualization_type in ['cluster_analysis']:
         return [
             dcc.Graph(id=f'{visualization_type}_color'),
             dcc.Graph(id='scarf_plot_color'),
-            html.Label("Number of clusters:"),
+            dcc.Dropdown(id='dropdown_user_color', value=None, multi=True, placeholder='filter by User(s)...'),
             dcc.Input(id='selected_n_clusters_color', type='number', value=3, min=1, step=1),
-            dcc.Dropdown(id='dropdown_user_color', value=None, multi=True, placeholder='Filter by User(s)...'),
             dcc.Dropdown(
                 id='selected_aoi_type_color',
                 options=[
@@ -282,9 +253,8 @@ def update_plot_area(visualization_type, selected_city):
         ], [
             dcc.Graph(id=f'{visualization_type}_grey'),
             dcc.Graph(id='scarf_plot_grey'),
-            html.Label("Number of clusters:"),
+            dcc.Dropdown(id='dropdown_user_grey', value=None, multi=True, placeholder='filter by User(s)...'),
             dcc.Input(id='selected_n_clusters_grey', type='number', value=3, min=1, step=1),
-            dcc.Dropdown(id='dropdown_user_grey', value=None, multi=True, placeholder='Filter by User(s)...'),
             dcc.Dropdown(
                 id='selected_aoi_type_grey',
                 options=[
@@ -293,69 +263,6 @@ def update_plot_area(visualization_type, selected_city):
                 ],
                 value='Polygonale AOI'
             )
-
-        ]
-    elif visualization_type == 'cluster_analysis_map_color':
-        return [
-            dcc.Graph(id=f'{visualization_type}_1'),
-            dcc.Graph(id='scarf_plot_color_map_1'),
-            html.Label("Number of clusters:"),
-            dcc.Input(id='selected_n_clusters_color_1', type='number', value=3, min=1, step=1),
-            dcc.Dropdown(id='dropdown_user_color_1', value=None, multi=True, placeholder='Filter by User(s)...'),
-            dcc.Dropdown(
-                id='selected_aoi_type_color_1',
-                options=[
-                    {'label': 'Polygonale AOI', 'value': 'Polygonale AOI'},
-                    {'label': 'Bounding Box AOI', 'value': 'Bounding Box AOI'}
-                ],
-                value='Polygonale AOI'
-            )
-        ], [
-            dcc.Graph(id=f'{visualization_type}_2'),
-            dcc.Graph(id='scarf_plot_color_map_2'),
-            html.Label("Number of clusters:"),
-            dcc.Input(id='selected_n_clusters_color_2', type='number', value=3, min=1, step=1),
-            dcc.Dropdown(id='dropdown_user_color_2', value=None, multi=True, placeholder='Filter by User(s)...'),
-            dcc.Dropdown(
-                id='selected_aoi_type_color_2',
-                options=[
-                    {'label': 'Polygonale AOI', 'value': 'Polygonale AOI'},
-                    {'label': 'Bounding Box AOI', 'value': 'Bounding Box AOI'}
-                ],
-                value='Polygonale AOI'
-            )
-
-        ]
-    elif visualization_type == 'cluster_analysis_map_grey':
-        return [
-            dcc.Graph(id=f'{visualization_type}_1'),
-            dcc.Graph(id='scarf_plot_map_grey_1'),
-            html.Label("Number of clusters:"),
-            dcc.Input(id='selected_n_clusters_grey_1', type='number', value=3, min=1, step=1),
-            dcc.Dropdown(id='dropdown_user_grey', value=None, multi=True, placeholder='Filter by User(s)...'),
-            dcc.Dropdown(
-                id='selected_aoi_type_grey_1',
-                options=[
-                    {'label': 'Polygonale AOI', 'value': 'Polygonale AOI'},
-                    {'label': 'Bounding Box AOI', 'value': 'Bounding Box AOI'}
-                ],
-                value='Polygonale AOI'
-            )
-        ], [
-            dcc.Graph(id=f'{visualization_type}_2'),
-            dcc.Graph(id='scarf_plot_map_grey_2'),
-            html.Label("Number of clusters:"),
-            dcc.Input(id='selected_n_clusters_grey_2', type='number', value=3, min=1, step=1),
-            dcc.Dropdown(id='dropdown_user_grey', value=None, multi=True, placeholder='Filter by User(s)...'),
-            dcc.Dropdown(
-                id='selected_aoi_type_grey_2',
-                options=[
-                    {'label': 'Polygonale AOI', 'value': 'Polygonale AOI'},
-                    {'label': 'Bounding Box AOI', 'value': 'Bounding Box AOI'}
-                ],
-                value='Polygonale AOI'
-            )
-
         ]
     else:
         return [
@@ -383,7 +290,6 @@ def update_user_dropdowns(selected_city):
         return color_options, grey_options
 
     return [[], []]
-
 
 # 3.5 - Update Range-Slider in plot area, based on selected city and viz-type:
 def to_int(value):
@@ -466,36 +372,49 @@ def define_clusters(coords, selected_n_clusters):
     return kmeans, kmeans.labels_
 
 def update_clusters_color(coords, selected_n_clusters_color):
-
+    """
+    Performs clustering for the 'color' visualization.
+    """
     if coords.empty:
         return None, None
     kmeans, labels = define_clusters(coords, selected_n_clusters_color)
     return kmeans, labels
 
 def update_clusters_grey(coords, selected_n_clusters_grey):
+    """
+    Performs clustering for the 'grey' visualization.
+    """
     if coords.empty:
         return None, None
     kmeans, labels = define_clusters(coords, selected_n_clusters_grey)
     return kmeans, labels
 
 
-def add_aoi_visualization_color(fig, coords, labels, cluster_colors, selected_n_clusters_color, selected_aoi_type_color):
+
+
+
+def add_aoi_visualization_color(fig, coords, labels, selected_n_clusters_color, selected_aoi_type_color):
+    """
+    Adds AOI visualization to the figure for the 'color' visualization.
+    """
+    colors = ['rgba(255, 0, 0, 0.5)', 'rgba(0, 255, 0, 0.5)', 'rgba(0, 0, 255, 0.5)',
+              'rgba(255, 255, 0, 0.5)', 'rgba(255, 0, 255, 0.5)']
+
     if selected_aoi_type_color == 'Polygonale AOI':
         for i in range(selected_n_clusters_color):
             cluster_points = coords[labels == i].values
             if len(cluster_points) >= 3:
                 hull = ConvexHull(cluster_points)
                 hull_points = cluster_points[hull.vertices]
-                hull_points = np.append(hull_points, [hull_points[0]], axis=0)
+                hull_points = np.append(hull_points, [hull_points[0]], axis=0)  # Close the polygon
                 fig.add_trace(go.Scatter(
                     x=hull_points[:, 0],
                     y=hull_points[:, 1],
                     mode='lines',
                     fill='toself',
-                    fillcolor=cluster_colors[i],
+                    fillcolor=colors[i % len(colors)],
                     line=dict(color='rgba(0,0,0,0)'),
-                    opacity=0.4,
-                    name=f'Cluster AOI {i}'
+                    name=f'Cluster {i} AOI'
                 ))
 
     elif selected_aoi_type_color == 'Bounding Box AOI':
@@ -508,88 +427,42 @@ def add_aoi_visualization_color(fig, coords, labels, cluster_colors, selected_n_
                     type='rect',
                     x0=min_x, y0=min_y,
                     x1=max_x, y1=max_y,
-                    line=dict(color=cluster_colors[i], dash='dash'),
-                    fillcolor=cluster_colors[i],
-                    opacity=0.4,
-                    name=f'Cluster AOI {i}'
+                    line=dict(color=colors[i % len(colors)], dash='dash'),
+                    fillcolor=colors[i % len(colors)],
+                    opacity=0.3
                 )
     return fig
 
-def add_aoi_visualization_grey(fig, coords, labels, cluster_colors, selected_aoi_type_grey):
-    n_clusters = len(np.unique(labels))
-
-    if selected_aoi_type_grey == 'Polygonale AOI':
-        for i in range(n_clusters):
-            cluster_points = coords[labels == i].values
-            if len(cluster_points) >= 3:
-                hull = ConvexHull(cluster_points)
-                hull_points = cluster_points[hull.vertices]
-                hull_points = np.append(hull_points, [hull_points[0]], axis=0)
-                fig.add_trace(go.Scatter(
-                    x=hull_points[:, 0],
-                    y=hull_points[:, 1],
-                    mode='lines',
-                    fill='toself',
-                    fillcolor=cluster_colors[i],
-                    line=dict(color='rgba(0,0,0,0)'),
-                    opacity=0.4,
-                    name=f'Cluster AOI {i}',
-                ))
-
-    elif selected_aoi_type_grey == 'Bounding Box AOI':
-        for i in range(n_clusters):
-            cluster_points = coords[labels == i]
-            if not cluster_points.empty:
-                min_x, min_y = cluster_points.min()
-                max_x, max_y = cluster_points.max()
-                fig.add_shape(
-                    type='rect',
-                    x0=min_x, y0=min_y,
-                    x1=max_x, y1=max_y,
-                    line=dict(color=cluster_colors[i], dash='dash'),
-                    fillcolor=cluster_colors[i],
-                    opacity=0.4,
-                    name=f'Cluster AOI {i}'
-                )
-    return fig
-
-
-
-
-
-def generate_cluster_colors(n_clusters):
-    base_colors = px.colors.sample_colorscale('Viridis', [i / max(n_clusters - 1, 1) for i in range(n_clusters)])
-    return {
-        i: color.replace(' ', '') for i, color in enumerate(base_colors)
-    }
-
-# Funktion zur Erstellung des Scarf-Plots
 def create_scarf_plot(df, cluster_colors):
-    if df.empty:
-        fig = go.Figure()
-        fig.update_layout(
-            title="No data available for the scarf plot.",
-            xaxis=dict(visible=False),
-            yaxis=dict(visible=False)
-        )
-        return fig
+    if 'AOI_Cluster' not in df.columns:
+        df['AOI_Cluster'] = 0  # Fallback if clusters are not defined
 
-    # Scarf-Plot erstellen, ohne Kategorisierung, aber mit Farbmapping
+    df['CumulativeTime'] = df.groupby(['user', 'AOI_Cluster'])['FixationDuration'].cumsum()
+
     fig = px.bar(
         df,
-        x='FixationDuration',
+        x='CumulativeTime',
         y='user',
-        color='AOI Cluster',
-        labels={
-            'FixationDuration': 'Fixation Duration',
-            'user': 'User ID',
-            'AOI Cluster': 'Cluster'
-        },
+        color='AOI_Cluster',
+        title="Scarf Plot: AOIs Gazed Over Time",
+        labels={"CumulativeTime": "Fixation Duration (ms)", "user": "User", "AOI_Cluster": "Cluster"},
         color_discrete_map=cluster_colors,
         barmode='stack',
         orientation='h'
     )
+    fig.update_layout(
+        xaxis_title="Cumulative Fixation Duration (ms)",
+        yaxis_title="User",
+        legend_title="Cluster",
+        height=600,
+    )
     return fig
+
+
+def generate_cluster_colors(n_clusters):
+    base_colors = px.colors.qualitative.Plotly
+    return {i: f'rgba({int(color[1:3], 16)}, {int(color[3:5], 16)}, {int(color[5:7], 16)}, 0.8)'
+            for i, color in enumerate(base_colors[:n_clusters])}
 
 
 """
@@ -2057,6 +1930,46 @@ def update_scatter_correlation_grey(active_button, selected_city, current_theme)
         fig = px.scatter()
         return fig
 
+def add_aoi_visualization_grey(fig, coords, labels, selected_n_clusters_grey, selected_aoi_type_grey):
+    """
+    Adds AOI visualization to the figure for the 'grey' visualization.
+    """
+    colors = ['rgba(255, 0, 0, 0.5)', 'rgba(0, 255, 0, 0.5)', 'rgba(0, 0, 255, 0.5)',
+              'rgba(255, 255, 0, 0.5)', 'rgba(255, 0, 255, 0.5)']
+
+
+    if selected_aoi_type_grey == 'Polygonale AOI':
+        for i in range(selected_n_clusters_grey):
+            cluster_points = coords[labels == i].values
+            if len(cluster_points) >= 3:
+                hull = ConvexHull(cluster_points)
+                hull_points = cluster_points[hull.vertices]
+                hull_points = np.append(hull_points, [hull_points[0]], axis=0)  # Close the polygon
+                fig.add_trace(go.Scatter(
+                    x=hull_points[:, 0],
+                    y=hull_points[:, 1],
+                    mode='lines',
+                    fill='toself',
+                    fillcolor=colors[i % len(colors)],
+                    line=dict(color='rgba(0,0,0,0)'),
+                    name=f'Cluster {i} AOI'
+                ))
+
+    elif selected_aoi_type_grey == 'Bounding Box AOI':
+        for i in range(selected_n_clusters_grey):
+            cluster_points = coords[labels == i]
+            if not cluster_points.empty:
+                min_x, min_y = cluster_points.min()
+                max_x, max_y = cluster_points.max()
+                fig.add_shape(
+                    type='rect',
+                    x0=min_x, y0=min_y,
+                    x1=max_x, y1=max_y,
+                    line=dict(color=colors[i % len(colors)], dash='dash'),
+                    fillcolor=colors[i % len(colors)],
+                    opacity=0.3
+                )
+    return fig
 
 """
 -----------------------------------------------------------------------------------------
@@ -2073,10 +1986,121 @@ Section 4:
      Input('current_theme', 'data')]
 )
 def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_color, selected_aoi_type_color, current_theme):
-    title_color = 'black' if current_theme == 'light' else 'white'
+    if selected_city:
+        # Filter and prepare data
+        filtered_df = df[(df['CityMap'] == selected_city) & (df['description'] == 'color')]
 
-    if not selected_city:
+        if selected_users:
+            if isinstance(selected_users, str):
+                selected_users = [selected_users]
+            filtered_df = filtered_df[filtered_df['user'].isin(selected_users)]
+
+        # Extract image path and size
+        image_path_color, width, height = get_image_path_color(selected_city)
+        if image_path_color and width and height:
+            filtered_df['NormalizedPointX'] = filtered_df['MappedFixationPointX']
+            filtered_df['NormalizedPointY'] = filtered_df['MappedFixationPointY']
+
+            filtered_df = filtered_df[
+                (filtered_df['NormalizedPointX'] >= 0) & (filtered_df['NormalizedPointX'] <= width) &
+                (filtered_df['NormalizedPointY'] >= 0) & (filtered_df['NormalizedPointY'] <= height)
+            ]
+
+        title_color = 'black' if current_theme == 'light' else 'white'
+
+        coords = filtered_df[['NormalizedPointX', 'NormalizedPointY']]
+        if coords.empty:
+            return go.Figure(), go.Figure()
+
+        # KMeans Clustering
+        kmeans, labels = update_clusters_color(coords, selected_n_clusters_color)
+        if kmeans is None:
+            return go.Figure(), go.Figure()
+
+        filtered_df['AOI_Cluster'] = labels
+
+        # Create Cluster Analysis Figure
+        fig_cluster = go.Figure()
+
+        fig_cluster.add_trace(go.Scatter(
+            x=coords['NormalizedPointX'],
+            y=coords['NormalizedPointY'],
+            mode='markers',
+            marker=dict(color=labels, colorscale='Viridis', opacity=0.6),
+            name='Fixation Points'
+        ))
+
+        fig_cluster = add_aoi_visualization_color(fig_cluster, coords, labels, selected_n_clusters_color, selected_aoi_type_color)
+
+        fig_cluster.add_layout_image(
+            dict(
+                source=image_path_color,
+                x=0,
+                sizex=width,
+                y=0,
+                sizey=height,
+                xref="x",
+                yref="y",
+                sizing="stretch",
+                opacity=0.8,
+                layer="below"
+            )
+        )
+
+        fig_cluster.update_layout(
+            title={
+                'text': f'<b>Color Map Observations in {selected_city}</b>',
+                'font': {
+                    'size': 12,
+                    'family': 'Arial, sans-serif',
+                    'color': title_color
+                }
+            },
+            xaxis_title=None,
+            yaxis_title=None,
+            plot_bgcolor='rgba(0, 0, 0, 0)',
+            paper_bgcolor='rgba(0, 0, 0, 0)',
+            margin=dict(l=0, r=5, t=40, b=5),
+            height=425,
+            showlegend=False
+        )
+
+        fig_cluster.update_xaxes(
+            range=[0, width],
+            showgrid=False,
+            showticklabels=True,
+            tickfont=dict(color=title_color, size=9, family='Arial, sans-serif')
+        )
+        fig_cluster.update_yaxes(
+            range=[height, 0],
+            showgrid=False,
+            showticklabels=True,
+            tickfont=dict(color=title_color, size=9, family='Arial, sans-serif')
+        )
+
+        # Create Scarf Plot
+        cluster_colors = {i: f'rgba({color[0]}, {color[1]}, {color[2]}, 0.8)'
+                          for i, color in sorted(enumerate(px.colors.qualitative.Plotly[:selected_n_clusters_color]),
+                                                 key=lambda x: x[0])}
+        fig_scarf = create_scarf_plot(filtered_df, cluster_colors)
+
+        fig_scarf.update_layout(
+            title={
+                'text': f'<b>Scarf Plot: AOI Gazed Over Time in {selected_city}</b>',
+                'font': {
+                    'size': 12,
+                    'family': 'Arial, sans-serif',
+                    'color': title_color
+                }
+            }
+        )
+
+        return fig_cluster, fig_scarf
+
+    else:
+        # Fallback when no city is selected
         fig_empty = go.Figure()
+        title_color = 'black' if current_theme == 'light' else 'white'
         fig_empty.update_layout(
             title={
                 'text': "No City Map selected.<br><br>"
@@ -2092,171 +2116,17 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
                     'family': 'Arial, sans-serif'
                 }
             },
-            paper_bgcolor='rgba(0, 0, 0, 0)',
             plot_bgcolor='rgba(0, 0, 0, 0)',
-            xaxis=dict(visible=False),
-            yaxis=dict(visible=False),
+            paper_bgcolor='rgba(0, 0, 0, 0)',
+            showlegend=False,
+            margin=dict(l=0, r=5, t=40, b=5),
             height=425
         )
+
+        fig_empty.update_xaxes(showgrid=False, zeroline=False, showline=False, showticklabels=False)
+        fig_empty.update_yaxes(showgrid=False, zeroline=False, showline=False, showticklabels=False)
+
         return fig_empty, fig_empty
-
-    # Filter data based on user and city selections
-    filtered_df = df[(df['CityMap'] == selected_city) & (df['description'] == 'color')]
-
-    if selected_users:
-        if isinstance(selected_users, str):
-            selected_users = [selected_users]
-        filtered_df = filtered_df[filtered_df['user'].isin(selected_users)]
-
-    # Get image dimensions
-    image_path_color, width, height = get_image_path_color(selected_city)
-    if not (image_path_color and width and height):
-        return go.Figure(), go.Figure()
-
-    # Normalize fixation points within image dimensions
-    filtered_df['NormalizedPointX'] = filtered_df['MappedFixationPointX']
-    filtered_df['NormalizedPointY'] = filtered_df['MappedFixationPointY']
-    filtered_df = filtered_df[
-        (filtered_df['NormalizedPointX'] >= 0) & (filtered_df['NormalizedPointX'] <= width) &
-        (filtered_df['NormalizedPointY'] >= 0) & (filtered_df['NormalizedPointY'] <= height)
-    ]
-
-    if filtered_df.empty:
-        return go.Figure(), go.Figure()
-
-    coords = filtered_df[['NormalizedPointX', 'NormalizedPointY']]
-    kmeans, labels = update_clusters_grey(coords, selected_n_clusters_color)
-    if kmeans is None:
-        return go.Figure(), go.Figure()
-
-    # Cluster und Farben updaten
-    coords = filtered_df[['NormalizedPointX', 'NormalizedPointY']]
-    kmeans, labels = update_clusters_grey(coords, selected_n_clusters_color)
-
-    if kmeans is None:
-        return go.Figure(), go.Figure()
-
-    filtered_df['AOI Cluster'] = labels
-    cluster_colors = generate_cluster_colors(selected_n_clusters_color)
-
-    # Create Cluster Analysis Figure
-    fig_cluster = go.Figure()
-    fig_cluster.add_trace(go.Scatter(
-        x=coords['NormalizedPointX'],
-        y=coords['NormalizedPointY'],
-        mode='markers',
-        marker=dict(
-            color=[cluster_colors[label] for label in filtered_df['AOI Cluster']],
-            size=5,
-            opacity=0.6
-        ),
-        hoverinfo='skip',
-        text=[f'Cluster: {label}' for label in labels],
-        name='Fixation Points'
-    ))
-    fig_cluster = add_aoi_visualization_color(
-        fig_cluster, coords, labels, cluster_colors, selected_n_clusters_color, selected_aoi_type_color
-    )
-    fig_cluster.add_layout_image(
-        dict(
-            source=image_path_color,
-            x=0,
-            sizex=width,
-            y=0,
-            sizey=height,
-            xref="x",
-            yref="y",
-            sizing="stretch",
-            opacity=1,
-            layer="below"
-        )
-    )
-
-    fig_cluster.update_layout(
-        title=dict(
-            text=f'<b>Cluster in {selected_city}</b>',
-            font=dict(size=12, family='Arial, sans-serif', color=title_color)
-        ),
-        margin=dict(l=50, r=30, t=50, b=50),
-        height=525,
-        xaxis=dict(range=[0, width], showgrid=False, tickfont=dict(color=title_color)),
-        yaxis=dict(range=[height, 0], showgrid=False, tickfont=dict(color=title_color)),
-        legend_title=dict(
-            text='AOI Cluster',
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        legend=dict(
-            orientation='h',
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-
-        plot_bgcolor='rgba(0, 0, 0, 0)',  # Transparent plot area
-
-    )
-
-    # Create Scarf Plot
-    def create_scarf_plot(df, cluster_colors):
-        if df.empty:
-            return go.Figure().update_layout(
-                title="No data available for the scarf plot.",
-                xaxis=dict(visible=False),
-                yaxis=dict(visible=False)
-            )
-
-        # Berechnung der kumulativen Fixationsdauer
-        # Berechnung der kumulativen Fixationsdauer
-        df['CumulativeTime'] = df.groupby(['user', 'AOI Cluster'])['Timestamp'].cumsum()
-
-        # Explizite Sortierung der Nutzer und Cluster
-        cluster_order = df['AOI Cluster'].unique()  # Optional: Sortierung nach Namen/ID
-        user_order = sorted(df['user'].unique())  # Optional: Sortierung nach Namen/ID
-
-        # Scarf-Plot erstellen
-        fig = px.bar(
-            df,
-            x='FixationDuration',
-            y='user',
-            color='AOI Cluster',
-            color_discrete_map=cluster_colors,
-            barmode='stack',
-            orientation='h',
-            category_orders={
-                'user': user_order,  # Explizite Sortierung der Nutzer
-                'AOI Cluster': cluster_order  # Explizite Sortierung der Cluster
-            }
-        )
-
-        return fig
-
-    # Create the Scarf Plot
-    fig_scarf = create_scarf_plot(filtered_df, cluster_colors)
-
-    # Update the layout for additional customization
-    fig_scarf.update_layout(
-        title={
-            'text': f'<b>Scarf Plot: AOI Gazed Over Time in {selected_city}</b>',
-            'font': {'size': 12, 'family': 'Arial, sans-serif', 'color': title_color}
-        },
-        xaxis=dict(visible=True, title=None),
-        yaxis=dict(visible=True, title=None),
-        legend_title=dict(
-            text='AOI Cluster',  # Title of the legend
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        margin=dict(l=50, r=30, t=50, b=50),
-        height=525,
-        legend=dict(
-            orientation='h',  # Horizontal legend
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        plot_bgcolor='rgba(0, 0, 0, 0)',
-        coloraxis_showscale=False
-        # Transparent background
-    )
-
-    return fig_cluster, fig_scarf
-
-
 
 """
 -----------------------------------------------------------------------------------------
@@ -2273,224 +2143,8 @@ Section 4:
      Input('current_theme', 'data')]
 )
 def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_grey, selected_aoi_type_grey, current_theme):
-    title_color = 'black' if current_theme == 'light' else 'white'
-
-    if not selected_city:
-        title_color = 'black' if current_theme == 'light' else 'white'
-        fig_empty = go.Figure()
-        fig_empty.update_layout(
-            title={
-                'text': "No City Map selected.<br><br>"
-                        "To display the <b>Scarf Plot</b> on a specific map,<br>"
-                        "please select a city from the dropdown on the left.",
-                'y': 0.6,
-                'x': 0.5,
-                'xanchor': 'center',
-                'yanchor': 'middle',
-                'font': {
-                    'size': 14,
-                    'color': title_color,
-                    'family': 'Arial, sans-serif'
-                }
-            },
-            paper_bgcolor='rgba(0, 0, 0, 0)',
-            plot_bgcolor='rgba(0, 0, 0, 0)',
-            xaxis=dict(visible=False),
-            yaxis=dict(visible=False),
-            height=425
-        )
-
-        # Cluster Analysis placeholder
-        cities = [
-            {"name": "Antwerpen", "lat": 51.2194, "lon": 4.4025},
-            {"name": "Berlin", "lat": 52.5200, "lon": 13.4050},
-            {"name": "Bordeaux", "lat": 44.8378, "lon": -0.5792},
-            {"name": "Köln", "lat": 50.9375, "lon": 6.9603},
-            {"name": "Frankfurt", "lat": 50.1109, "lon": 8.6821},
-            {"name": "Hamburg", "lat": 53.5511, "lon": 9.9937},
-            {"name": "Moskau", "lat": 55.7558, "lon": 37.6173},
-            {"name": "Riga", "lat": 56.9496, "lon": 24.1052},
-            {"name": "Tokyo", "lat": 35.6895, "lon": 139.6917},
-            {"name": "Barcelona", "lat": 41.3851, "lon": 2.1734},
-            {"name": "Bologna", "lat": 44.4949, "lon": 11.3426},
-            {"name": "Brüssel", "lat": 50.8503, "lon": 4.3517},
-            {"name": "Budapest", "lat": 47.4979, "lon": 19.0402},
-            {"name": "Düsseldorf", "lat": 51.2277, "lon": 6.7735},
-            {"name": "Göteborg", "lat": 57.7089, "lon": 11.9746},
-            {"name": "Hong-Kong", "lat": 22.3193, "lon": 114.1694},
-            {"name": "Krakau", "lat": 50.0647, "lon": 19.9450},
-            {"name": "Ljubljana", "lat": 46.0569, "lon": 14.5058},
-            {"name": "New-York", "lat": 40.7128, "lon": -74.0060},
-            {"name": "Paris", "lat": 48.8566, "lon": 2.3522},
-            {"name": "Pisa", "lat": 43.7228, "lon": 10.4017},
-            {"name": "Venedig", "lat": 45.4408, "lon": 12.3155},
-            {"name": "Warschau", "lat": 52.2297, "lon": 21.0122},
-            {"name": "Zürich", "lat": 47.3769, "lon": 8.5417}
-        ]
-        lats = [city["lat"] for city in cities]
-        lons = [city["lon"] for city in cities]
-        names = [city["name"] for city in cities]
-        fig = go.Figure()
-        fig.add_trace(go.Scattergeo(
-            locationmode='ISO-3',
-            lon=lons,
-            lat=lats,
-            text=names,
-            mode='markers',
-            marker=dict(
-                size=6,
-                symbol='circle',
-                color='blue'
-            ),
-            textposition='top right',
-            hoverinfo='text'
-        ))
-
-        fig.update_layout(
-            title=dict(
-                text='<br><br><b>Available City Maps</b><br>'
-                     '(zoom out to see cities outside Europe)',
-                font=dict(size=12, family='Arial, sans-serif', color=title_color),
-            ),
-            plot_bgcolor='rgba(0, 0, 0, 0)',
-            paper_bgcolor='rgba(0, 0, 0, 0)',
-            geo=dict(
-                projection_type='natural earth',
-                showland=True,
-                landcolor='lightgray',
-                coastlinecolor='darkgray',
-                showcoastlines=True,
-                showcountries=True,
-                countrycolor='darkgray',
-                lonaxis=dict(range=[-10, 40]),
-                lataxis=dict(range=[35, 65])
-            ),
-            margin=dict(l=5, r=5, t=100, b=5),
-            height=424
-        )
-
-        return fig, fig_empty
-
-    # Filter data
-    filtered_df = df[(df['CityMap'] == selected_city) & (df['description'] == 'grey')]
-
-    if selected_users:
-        if isinstance(selected_users, str):
-            selected_users = [selected_users]
-        filtered_df = filtered_df[filtered_df['user'].isin(selected_users)]
-
-    # Get image dimensions
-    image_path_grey, width, height = get_image_path_grey(selected_city)
-    if not (image_path_grey and width and height):
-        return go.Figure(), go.Figure()
-
-    # Normalize and filter coordinates
-    filtered_df['NormalizedPointX'] = filtered_df['MappedFixationPointX']
-    filtered_df['NormalizedPointY'] = filtered_df['MappedFixationPointY']
-    filtered_df = filtered_df[
-        (filtered_df['NormalizedPointX'] >= 0) & (filtered_df['NormalizedPointX'] <= width) &
-        (filtered_df['NormalizedPointY'] >= 0) & (filtered_df['NormalizedPointY'] <= height)
-    ]
-
-    if filtered_df.empty:
-        return go.Figure(), go.Figure()
-
-    # Clustering
-    coords = filtered_df[['NormalizedPointX', 'NormalizedPointY']]
-    kmeans, labels = update_clusters_grey(coords, selected_n_clusters_grey)
-    if kmeans is None:
-        return go.Figure(), go.Figure()
-
-    filtered_df['AOI Cluster'] = labels
-
-    # Generate unified cluster colors
-    cluster_colors = generate_cluster_colors(selected_n_clusters_grey)
-
-    # Create Cluster Analysis Figure
-    fig_cluster = go.Figure()
-    fig_cluster.add_trace(go.Scatter(
-        x=coords['NormalizedPointX'],
-        y=coords['NormalizedPointY'],
-        mode='markers',
-        marker=dict(
-            color=[cluster_colors[label] for label in labels],
-            size=5,
-            opacity=0.6
-        ),
-        hoverinfo='skip'
-    ))
-    fig_cluster = add_aoi_visualization_color(
-        fig_cluster, coords, labels, cluster_colors, selected_n_clusters_grey, selected_aoi_type_grey
-    )
-    fig_cluster.add_layout_image(
-        dict(
-            source=image_path_grey,
-            x=0,
-            sizex=width,
-            y=0,
-            sizey=height,
-            xref="x",
-            yref="y",
-            sizing="stretch",
-            opacity=1,
-            layer="below"
-        )
-    )
-    fig_cluster.update_layout(
-        title=dict(
-            text=f'<b>Cluster in {selected_city}</b>',
-            font=dict(size=12, family='Arial, sans-serif', color=title_color)
-        ),
-        margin=dict(l=50, r=30, t=50, b=50),
-        height=525,
-        xaxis=dict(range=[0, width]),
-        yaxis=dict(range=[height, 0]),
-        plot_bgcolor='rgba(0, 0, 0, 0)'
-    )
-    # Scarf-Plot
-    fig_scarf = create_scarf_plot(filtered_df, cluster_colors)
-    fig_scarf.update_layout(
-        title={
-            'text': f'<b>Scarf Plot: AOI Gazed Over Time in {selected_city}</b>',
-            'font': {'size': 12, 'family': 'Arial, sans-serif', 'color': title_color}
-        },
-        xaxis=dict(visible=True, title=None),
-        yaxis=dict(visible=True, title=None),
-        legend_title=dict(
-            text='AOI Cluster',
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        margin=dict(l=50, r=30, t=50, b=50),
-        height=525,
-        legend=dict(
-            orientation='h',
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        plot_bgcolor='rgba(0, 0, 0, 0)',
-        coloraxis_showscale=False
-    )
-
-    return fig_cluster, fig_scarf
-
-"""
------------------------------------------------------------------------------------------
-Section 4:
-4.12 - Definition of Opacity Map Grey
-"""
-from dash import Input, Output
-
-@app.callback(
-    Output('opacity_map_grey', 'figure'),
-    [
-        Input('city_dropdown', 'value'),
-        Input('dropdown_user_grey', 'value'),
-        Input('range_slider_grey', 'value'),
-        Input('current_theme', 'data')
-    ]
-)
-def update_opacity_map(selected_city, selected_users, range_slider_value, current_theme):
     if selected_city:
-        # Filter and sort data based on the selected filters (city and user):
+        # Filter and prepare data
         filtered_df = df[(df['CityMap'] == selected_city) & (df['description'] == 'grey')]
 
         if selected_users:
@@ -2498,359 +2152,111 @@ def update_opacity_map(selected_city, selected_users, range_slider_value, curren
                 selected_users = [selected_users]
             filtered_df = filtered_df[filtered_df['user'].isin(selected_users)]
 
-        min_duration, max_duration = range_slider_value
-        filtered_df = filtered_df[
-            (filtered_df['FixationDuration_aggregated'] >= min_duration) &
-            (filtered_df['FixationDuration_aggregated'] <= max_duration)]
-
-        # Extract Image Information and normalize data
+        # Extract image path and size
         image_path_grey, width, height = get_image_path_grey(selected_city)
         if image_path_grey and width and height:
-            # Normalize fixation points
-            if selected_city == 'Antwerpen_S1':
-                filtered_df['NormalizedPointX'] = (
-                    filtered_df['MappedFixationPointX'] / 1651.00 * width)
-                filtered_df['NormalizedPointY'] = (
-                    filtered_df['MappedFixationPointY'] / 1200.00 * height)
-            else:
-                filtered_df['NormalizedPointX'] = filtered_df['MappedFixationPointX']
-                filtered_df['NormalizedPointY'] = filtered_df['MappedFixationPointY']
+            filtered_df['NormalizedPointX'] = filtered_df['MappedFixationPointX']
+            filtered_df['NormalizedPointY'] = filtered_df['MappedFixationPointY']
 
-            # Filter for fixation points within map only
             filtered_df = filtered_df[
                 (filtered_df['NormalizedPointX'] >= 0) & (filtered_df['NormalizedPointX'] <= width) &
-                (filtered_df['NormalizedPointY'] >= 0) & (filtered_df['NormalizedPointY'] <= height)]
-
-            # Set title color based on theme
-            title_color = 'black' if current_theme == 'light' else 'white'
-
-            # Initialize opacity values for the map
-            fig = px.density_heatmap(
-                filtered_df,
-                x='NormalizedPointX',
-                y='NormalizedPointY',
-                nbinsx=50,
-                nbinsy=50,
-                color_continuous_scale=[
-                    [0.0, "rgba(0, 0, 0, 1)"],  # Black (opaque)
-                    [0.5, "rgba(255, 255, 255, 0)"],  # Gray (semi-transparent)
-                    [1.0, "rgba(255, 255, 255, 0)"]  # White (fully transparent)
-                ],
-            )
-            fig.update_coloraxes(showscale=False)
-
-            # Update heatmap traces
-            fig.update_traces(
-                showscale=False,  # Hide the scale bar
-                opacity=0.8
-            )
-
-            # Update axes
-            fig.update_xaxes(
-                range=[0, width],
-                autorange=True,
-                showgrid=False,
-                showticklabels=True,
-                tickfont=dict(color=title_color, size=9, family='Arial, sans-serif'))
-
-            fig.update_yaxes(
-                range=[height, 0],
-                autorange=True,
-                showgrid=False,
-                showticklabels=True,
-                tickfont=dict(color=title_color, size=9, family='Arial, sans-serif'))
-
-            # Add background image
-            fig.add_layout_image(
-                dict(
-                    source=image_path_grey,
-                    x=0,
-                    sizex=width,
-                    y=0,
-                    sizey=height,
-                    xref="x",
-                    yref="y",
-                    sizing="stretch",
-                    opacity=0.8,
-                    layer="below"
-                )
-            )
-
-            # Update layout
-            fig.update_layout(
-                plot_bgcolor='rgba(255, 255, 255, 0.8)',
-                paper_bgcolor='rgba(0, 0, 0, 0)',
-                xaxis_title=None,
-                yaxis_title=None,
-                title={
-                    'text': f'<b>Opacity Map Observations in {selected_city}</b>',
-                    'font': {
-                        'size': 12,
-                        'family': 'Arial, sans-serif',
-                        'color': title_color}
-                },
-                margin=dict(l=0, r=5, t=40, b=5),
-                showlegend=False,
-                height=425)
-
-            return fig
-
-    else:
-            title_color = 'black' if current_theme == 'light' else 'white'
-            cities = [
-                {"name": "Antwerpen", "lat": 51.2194, "lon": 4.4025},
-                {"name": "Berlin", "lat": 52.5200, "lon": 13.4050},
-                {"name": "Bordeaux", "lat": 44.8378, "lon": -0.5792},
-                {"name": "Köln", "lat": 50.9375, "lon": 6.9603},
-                {"name": "Frankfurt", "lat": 50.1109, "lon": 8.6821},
-                {"name": "Hamburg", "lat": 53.5511, "lon": 9.9937},
-                {"name": "Moskau", "lat": 55.7558, "lon": 37.6173},
-                {"name": "Riga", "lat": 56.9496, "lon": 24.1052},
-                {"name": "Tokyo", "lat": 35.6895, "lon": 139.6917},
-                {"name": "Barcelona", "lat": 41.3851, "lon": 2.1734},
-                {"name": "Bologna", "lat": 44.4949, "lon": 11.3426},
-                {"name": "Brüssel", "lat": 50.8503, "lon": 4.3517},
-                {"name": "Budapest", "lat": 47.4979, "lon": 19.0402},
-                {"name": "Düsseldorf", "lat": 51.2277, "lon": 6.7735},
-                {"name": "Göteborg", "lat": 57.7089, "lon": 11.9746},
-                {"name": "Hong-Kong", "lat": 22.3193, "lon": 114.1694},
-                {"name": "Krakau", "lat": 50.0647, "lon": 19.9450},
-                {"name": "Ljubljana", "lat": 46.0569, "lon": 14.5058},
-                {"name": "New-York", "lat": 40.7128, "lon": -74.0060},
-                {"name": "Paris", "lat": 48.8566, "lon": 2.3522},
-                {"name": "Pisa", "lat": 43.7228, "lon": 10.4017},
-                {"name": "Venedig", "lat": 45.4408, "lon": 12.3155},
-                {"name": "Warschau", "lat": 52.2297, "lon": 21.0122},
-                {"name": "Zürich", "lat": 47.3769, "lon": 8.5417}
+                (filtered_df['NormalizedPointY'] >= 0) & (filtered_df['NormalizedPointY'] <= height)
             ]
-
-            lats = [city["lat"] for city in cities]
-            lons = [city["lon"] for city in cities]
-            names = [city["name"] for city in cities]
-
-            fig = go.Figure()
-
-            fig.add_trace(go.Scattergeo(
-                locationmode='ISO-3',
-                lon=lons,
-                lat=lats,
-                text=names,
-                mode='markers',
-                marker=dict(
-                    size=6,
-                    symbol='circle',
-                    color='blue'
-                ),
-                textposition='top right',
-                hoverinfo='text'
-            ))
-
-            fig.update_layout(
-                title=dict(
-                    text='<br><br><b>Available City Maps</b><br>'
-                         '(zoom out to see cities outside Europe)',
-                    font=dict(size=12, family='Arial, sans-serif', color=title_color),
-                ),
-                plot_bgcolor='rgba(0, 0, 0, 0)',
-                paper_bgcolor='rgba(0, 0, 0, 0)',
-                geo=dict(
-                    projection_type='natural earth',
-                    showland=True,
-                    landcolor='lightgray',
-                    coastlinecolor='darkgray',
-                    showcoastlines=True,
-                    showcountries=True,
-                    countrycolor='darkgray',
-                    lonaxis=dict(range=[-10, 40]),  # Longitude range for Europe
-                    lataxis=dict(range=[35, 65])  # Latitude range for Europe
-                ),
-                margin=dict(l=5, r=5, t=100, b=5),
-                height=424
-            )
-            return fig
-
-
-
-
-
-"""
------------------------------------------------------------------------------------------
-Section 4:
-4.13 - Definition of Opacity Map Color
-"""
-@app.callback(
-    Output('opacity_map_color', 'figure'),
-    [Input('city_dropdown', 'value'),
-     Input('dropdown_user_color', 'value'),
-     Input('range_slider_color', 'value'),
-     Input('current_theme', 'data')]
-)
-def update_opacity_map(selected_city, selected_users, range_slider_value, current_theme):
-    if selected_city:
-        # Filter and sort data
-        filtered_df = df[(df['CityMap'] == selected_city) & (df['description'] == 'color')]
-
-        if selected_users:
-            if isinstance(selected_users, str):
-                selected_users = [selected_users]
-            filtered_df = filtered_df[filtered_df['user'].isin(selected_users)]
-
-        min_duration, max_duration = range_slider_value
-        filtered_df = filtered_df[
-            (filtered_df['FixationDuration_aggregated'] >= min_duration) &
-            (filtered_df['FixationDuration_aggregated'] <= max_duration)
-        ]
-
-        # Extract image information
-        image_path_color, width, height = get_image_path_color(selected_city)
-        if image_path_color and width and height:
-            # Normalize fixation points
-            if selected_city == 'Antwerpen_S1':
-                reference_width = 1651.00
-                reference_height = 1200.00
-                filtered_df['NormalizedPointX'] = (
-                    filtered_df['MappedFixationPointX'] / reference_width * width
-                )
-                filtered_df['NormalizedPointY'] = (
-                    filtered_df['MappedFixationPointY'] / reference_height * height
-                )
-            else:
-                filtered_df['NormalizedPointX'] = filtered_df['MappedFixationPointX']
-                filtered_df['NormalizedPointY'] = filtered_df['MappedFixationPointY']
-
-            # Filter points within bounds
-            filtered_df = filtered_df[
-                (filtered_df['NormalizedPointX'] >= 0) &
-                (filtered_df['NormalizedPointX'] <= width) &
-                (filtered_df['NormalizedPointY'] >= 0) &
-                (filtered_df['NormalizedPointY'] <= height)
-            ]
-
-            # Set title color
-            title_color = 'black' if current_theme == 'light' else 'white'
-
-            # Create the heatmap
-            fig = px.density_heatmap(
-                filtered_df,
-                x='NormalizedPointX',
-                y='NormalizedPointY',
-                nbinsx=50,
-                nbinsy=50,
-                color_continuous_scale=[
-                    [0.0, "rgba(0, 0, 0, 1)"],  # Black (opaque)
-                    [0.5, "rgba(255, 255, 255, 0)"],  # Gray (semi-transparent)
-                    [1.0, "rgba(255, 255, 255, 0)"]  # White (fully transparent)
-                ],
-            )
-            fig.update_coloraxes(showscale=False)
-
-            # Update heatmap traces
-            fig.update_traces(
-                showscale=False,  # Hide the scale bar
-                opacity=0.8
-            )
-
-            # Update axes
-            fig.update_xaxes(
-                range=[0, width],
-                autorange=True,
-                showgrid=False,
-                showticklabels=True,
-                tickfont=dict(color=title_color, size=9, family='Arial, sans-serif'))
-
-            fig.update_yaxes(
-                range=[height, 0],
-                autorange=True,
-                showgrid=False,
-                showticklabels=True,
-                tickfont=dict(color=title_color, size=9, family='Arial, sans-serif'))
-
-            # Add background image
-            fig.add_layout_image(
-                dict(
-                    source=image_path_color,
-                    x=0,
-                    sizex=width,
-                    y=0,
-                    sizey=height,
-                    xref="x",
-                    yref="y",
-                    sizing="stretch",
-                    opacity=0.8,
-                    layer="below"
-                )
-            )
-
-            # Update layout
-            fig.update_layout(
-                plot_bgcolor='rgba(255, 255, 255, 0.8)',
-                paper_bgcolor='rgba(0, 0, 0, 0)',
-                xaxis_title=None,
-                yaxis_title=None,
-                title={
-                    'text': f'<b>Opacity Map Observations in {selected_city}</b>',
-                    'font': {
-                        'size': 12,
-                        'family': 'Arial, sans-serif',
-                        'color': title_color}
-                },
-                margin=dict(l=0, r=5, t=40, b=5),
-                showlegend=False,
-                height=425)
-
-            return fig
-
-    else:
-        fig = px.scatter()
 
         title_color = 'black' if current_theme == 'light' else 'white'
 
-        fig.update_layout(
+        coords = filtered_df[['NormalizedPointX', 'NormalizedPointY']]
+        if coords.empty:
+            return go.Figure(), go.Figure()
+
+        # KMeans Clustering
+        kmeans, labels = update_clusters_grey(coords, selected_n_clusters_grey)
+        if kmeans is None:
+            return go.Figure(), go.Figure()
+
+        filtered_df['AOI_Cluster'] = labels
+
+        # Create Cluster Analysis Figure
+        fig_cluster = go.Figure()
+
+        fig_cluster.add_trace(go.Scatter(
+            x=coords['NormalizedPointX'],
+            y=coords['NormalizedPointY'],
+            mode='markers',
+            marker=dict(color=labels, colorscale='Viridis', opacity=0.6),
+            name='Fixation Points'
+        ))
+
+        fig_cluster = add_aoi_visualization_grey(fig_cluster, coords, labels, selected_n_clusters_grey, selected_aoi_type_grey)
+
+        fig_cluster.add_layout_image(
+            dict(
+                source=image_path_grey,
+                x=0,
+                sizex=width,
+                y=0,
+                sizey=height,
+                xref="x",
+                yref="y",
+                sizing="stretch",
+                opacity=0.8,
+                layer="below"
+            )
+        )
+
+        fig_cluster.update_layout(
+            title={
+                'text': f'<b>Color Map Observations in {selected_city}</b>',
+                'font': {
+                    'size': 12,
+                    'family': 'Arial, sans-serif',
+                    'color': title_color
+                }
+            },
+            xaxis_title=None,
+            yaxis_title=None,
             plot_bgcolor='rgba(0, 0, 0, 0)',
             paper_bgcolor='rgba(0, 0, 0, 0)',
-            title={
-                'text': f"No City Map selected.<br><br>"
-                        f"To display the <b>Opacity Map</b> on a specific map,<br>"
-                        f"please select a city from the dropdown on the left.",
-                'y': 0.6,
-                'x': 0.5,
-                'xanchor': 'center',
-                'yanchor': 'middle',
-                'font': {
-                    'size': 14,
-                    'color': title_color,
-                    'family': 'Arial, sans-serif'
-                }},
-            showlegend=False,
             margin=dict(l=0, r=5, t=40, b=5),
-            height=425
+            height=425,
+            showlegend=False
         )
 
-        fig.update_xaxes(showgrid=False, zeroline=False, showline=False, showticklabels=False)
-        fig.update_yaxes(showgrid=False, zeroline=False, showline=False, showticklabels=False)
+        fig_cluster.update_xaxes(
+            range=[0, width],
+            showgrid=False,
+            showticklabels=True,
+            tickfont=dict(color=title_color, size=9, family='Arial, sans-serif')
+        )
+        fig_cluster.update_yaxes(
+            range=[height, 0],
+            showgrid=False,
+            showticklabels=True,
+            tickfont=dict(color=title_color, size=9, family='Arial, sans-serif')
+        )
 
-        return fig
+        # Create Scarf Plot
+        cluster_colors = {i: f'rgba({color[0]}, {color[1]}, {color[2]}, 0.8)'
+                          for i, color in sorted(enumerate(px.colors.qualitative.Plotly[:selected_n_clusters_grey]),
+                                                 key=lambda x: x[0])}
+        fig_scarf = create_scarf_plot(filtered_df, cluster_colors)
 
-"""
------------------------------------------------------------------------------------------
-Section 4:
-4.14.1 - Definition of Cluster Analysis Grey Maps 
-"""
+        fig_scarf.update_layout(
+            title={
+                'text': f'<b>Scarf Plot: AOI Gazed Over Time in {selected_city}</b>',
+                'font': {
+                    'size': 12,
+                    'family': 'Arial, sans-serif',
+                    'color': title_color
+                }
+            }
+        )
 
-@app.callback(
-    [Output('cluster_analysis_map_grey_1', 'figure'),
-     Output('scarf_plot_map_grey_1', 'figure')],
-    [Input('city_dropdown', 'value'),
-     Input('dropdown_user_grey', 'value'),
-     Input('selected_n_clusters_grey_1', 'value'),
-     Input('selected_aoi_type_grey_1', 'value'),
-     Input('current_theme', 'data')]
-)
-def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_grey, selected_aoi_type_grey, current_theme):
-    title_color = 'black' if current_theme == 'light' else 'white'
+        return fig_cluster, fig_scarf
 
-    if not selected_city:
+    else:
         title_color = 'black' if current_theme == 'light' else 'white'
+        # Placeholder figure with title for Scarf Plot
         fig_empty = go.Figure()
         fig_empty.update_layout(
             title={
@@ -2944,713 +2350,6 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
         )
 
         return fig, fig_empty
-
-    # Filter data
-    filtered_df = df[(df['CityMap'] == selected_city) & (df['description'] == 'grey')]
-
-    if selected_users:
-        if isinstance(selected_users, str):
-            selected_users = [selected_users]
-        filtered_df = filtered_df[filtered_df['user'].isin(selected_users)]
-
-    # Get image dimensions
-    image_path_grey, width, height = get_image_path_grey(selected_city)
-    if not (image_path_grey and width and height):
-        return go.Figure(), go.Figure()
-
-    # Normalize and filter coordinates
-    filtered_df['NormalizedPointX'] = filtered_df['MappedFixationPointX']
-    filtered_df['NormalizedPointY'] = filtered_df['MappedFixationPointY']
-    filtered_df = filtered_df[
-        (filtered_df['NormalizedPointX'] >= 0) & (filtered_df['NormalizedPointX'] <= width) &
-        (filtered_df['NormalizedPointY'] >= 0) & (filtered_df['NormalizedPointY'] <= height)
-    ]
-
-    if filtered_df.empty:
-        return go.Figure(), go.Figure()
-
-    # Clustering
-    coords = filtered_df[['NormalizedPointX', 'NormalizedPointY']]
-    kmeans, labels = update_clusters_grey(coords, selected_n_clusters_grey)
-    if kmeans is None:
-        return go.Figure(), go.Figure()
-
-    filtered_df['AOI Cluster'] = labels
-
-    # Generate unified cluster colors
-    cluster_colors = generate_cluster_colors(selected_n_clusters_grey)
-
-    # Create Cluster Analysis Figure
-    fig_cluster = go.Figure()
-    fig_cluster.add_trace(go.Scatter(
-        x=coords['NormalizedPointX'],
-        y=coords['NormalizedPointY'],
-        mode='markers',
-        marker=dict(
-            color=[cluster_colors[label] for label in labels],
-            size=5,
-            opacity=0.6
-        ),
-        hoverinfo='skip'
-    ))
-    fig_cluster = add_aoi_visualization_color(
-        fig_cluster, coords, labels, cluster_colors, selected_n_clusters_grey, selected_aoi_type_grey
-    )
-    fig_cluster.add_layout_image(
-        dict(
-            source=image_path_grey,
-            x=0,
-            sizex=width,
-            y=0,
-            sizey=height,
-            xref="x",
-            yref="y",
-            sizing="stretch",
-            opacity=1,
-            layer="below"
-        )
-    )
-    fig_cluster.update_layout(
-        title=dict(
-            text=f'<b>Cluster in {selected_city}</b>',
-            font=dict(size=12, family='Arial, sans-serif', color=title_color)
-        ),
-        margin=dict(l=50, r=30, t=50, b=50),
-        height=525,
-        xaxis=dict(range=[0, width]),
-        yaxis=dict(range=[height, 0]),
-        plot_bgcolor='rgba(0, 0, 0, 0)'
-    )
-    # Scarf-Plot
-    fig_scarf = create_scarf_plot(filtered_df, cluster_colors)
-    fig_scarf.update_layout(
-        title={
-            'text': f'<b>Scarf Plot: AOI Gazed Over Time in {selected_city}</b>',
-            'font': {'size': 12, 'family': 'Arial, sans-serif', 'color': title_color}
-        },
-        xaxis=dict(visible=True, title=None),
-        yaxis=dict(visible=True, title=None),
-        legend_title=dict(
-            text='AOI Cluster',
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        margin=dict(l=50, r=30, t=50, b=50),
-        height=525,
-        legend=dict(
-            orientation='h',
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        plot_bgcolor='rgba(0, 0, 0, 0)',
-        coloraxis_showscale=False
-    )
-
-    return fig_cluster, fig_scarf
-
-"""
------------------------------------------------------------------------------------------
-Section 4:
-4.14.2 - Definition of Cluster Analysis Grey Maps 
-"""
-
-@app.callback(
-    [Output('cluster_analysis_map_grey_2', 'figure'),
-     Output('scarf_plot_map_grey_2', 'figure')],
-    [Input('city_dropdown', 'value'),
-     Input('dropdown_user_grey', 'value'),
-     Input('selected_n_clusters_grey_2', 'value'),
-     Input('selected_aoi_type_grey_2', 'value'),
-     Input('current_theme', 'data')]
-)
-def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_grey, selected_aoi_type_grey, current_theme):
-    title_color = 'black' if current_theme == 'light' else 'white'
-
-    if not selected_city:
-        title_color = 'black' if current_theme == 'light' else 'white'
-        fig_empty = go.Figure()
-        fig_empty.update_layout(
-            title={
-                'text': "No City Map selected.<br><br>"
-                        "To display the <b>Scarf Plot</b> on a specific map,<br>"
-                        "please select a city from the dropdown on the left.",
-                'y': 0.6,
-                'x': 0.5,
-                'xanchor': 'center',
-                'yanchor': 'middle',
-                'font': {
-                    'size': 14,
-                    'color': title_color,
-                    'family': 'Arial, sans-serif'
-                }
-            },
-            paper_bgcolor='rgba(0, 0, 0, 0)',
-            plot_bgcolor='rgba(0, 0, 0, 0)',
-            xaxis=dict(visible=False),
-            yaxis=dict(visible=False),
-            height=425
-        )
-
-        # Cluster Analysis placeholder
-        cities = [
-            {"name": "Antwerpen", "lat": 51.2194, "lon": 4.4025},
-            {"name": "Berlin", "lat": 52.5200, "lon": 13.4050},
-            {"name": "Bordeaux", "lat": 44.8378, "lon": -0.5792},
-            {"name": "Köln", "lat": 50.9375, "lon": 6.9603},
-            {"name": "Frankfurt", "lat": 50.1109, "lon": 8.6821},
-            {"name": "Hamburg", "lat": 53.5511, "lon": 9.9937},
-            {"name": "Moskau", "lat": 55.7558, "lon": 37.6173},
-            {"name": "Riga", "lat": 56.9496, "lon": 24.1052},
-            {"name": "Tokyo", "lat": 35.6895, "lon": 139.6917},
-            {"name": "Barcelona", "lat": 41.3851, "lon": 2.1734},
-            {"name": "Bologna", "lat": 44.4949, "lon": 11.3426},
-            {"name": "Brüssel", "lat": 50.8503, "lon": 4.3517},
-            {"name": "Budapest", "lat": 47.4979, "lon": 19.0402},
-            {"name": "Düsseldorf", "lat": 51.2277, "lon": 6.7735},
-            {"name": "Göteborg", "lat": 57.7089, "lon": 11.9746},
-            {"name": "Hong-Kong", "lat": 22.3193, "lon": 114.1694},
-            {"name": "Krakau", "lat": 50.0647, "lon": 19.9450},
-            {"name": "Ljubljana", "lat": 46.0569, "lon": 14.5058},
-            {"name": "New-York", "lat": 40.7128, "lon": -74.0060},
-            {"name": "Paris", "lat": 48.8566, "lon": 2.3522},
-            {"name": "Pisa", "lat": 43.7228, "lon": 10.4017},
-            {"name": "Venedig", "lat": 45.4408, "lon": 12.3155},
-            {"name": "Warschau", "lat": 52.2297, "lon": 21.0122},
-            {"name": "Zürich", "lat": 47.3769, "lon": 8.5417}
-        ]
-        lats = [city["lat"] for city in cities]
-        lons = [city["lon"] for city in cities]
-        names = [city["name"] for city in cities]
-        fig = go.Figure()
-        fig.add_trace(go.Scattergeo(
-            locationmode='ISO-3',
-            lon=lons,
-            lat=lats,
-            text=names,
-            mode='markers',
-            marker=dict(
-                size=6,
-                symbol='circle',
-                color='blue'
-            ),
-            textposition='top right',
-            hoverinfo='text'
-        ))
-
-        fig.update_layout(
-            title=dict(
-                text='<br><br><b>Available City Maps</b><br>'
-                     '(zoom out to see cities outside Europe)',
-                font=dict(size=12, family='Arial, sans-serif', color=title_color),
-            ),
-            plot_bgcolor='rgba(0, 0, 0, 0)',
-            paper_bgcolor='rgba(0, 0, 0, 0)',
-            geo=dict(
-                projection_type='natural earth',
-                showland=True,
-                landcolor='lightgray',
-                coastlinecolor='darkgray',
-                showcoastlines=True,
-                showcountries=True,
-                countrycolor='darkgray',
-                lonaxis=dict(range=[-10, 40]),
-                lataxis=dict(range=[35, 65])
-            ),
-            margin=dict(l=5, r=5, t=100, b=5),
-            height=424
-        )
-
-        return fig, fig_empty
-
-    # Filter data
-    filtered_df = df[(df['CityMap'] == selected_city) & (df['description'] == 'grey')]
-
-    if selected_users:
-        if isinstance(selected_users, str):
-            selected_users = [selected_users]
-        filtered_df = filtered_df[filtered_df['user'].isin(selected_users)]
-
-    # Get image dimensions
-    image_path_grey, width, height = get_image_path_grey(selected_city)
-    if not (image_path_grey and width and height):
-        return go.Figure(), go.Figure()
-
-    # Normalize and filter coordinates
-    filtered_df['NormalizedPointX'] = filtered_df['MappedFixationPointX']
-    filtered_df['NormalizedPointY'] = filtered_df['MappedFixationPointY']
-    filtered_df = filtered_df[
-        (filtered_df['NormalizedPointX'] >= 0) & (filtered_df['NormalizedPointX'] <= width) &
-        (filtered_df['NormalizedPointY'] >= 0) & (filtered_df['NormalizedPointY'] <= height)
-    ]
-
-    if filtered_df.empty:
-        return go.Figure(), go.Figure()
-
-    # Clustering
-    coords = filtered_df[['NormalizedPointX', 'NormalizedPointY']]
-    kmeans, labels = update_clusters_grey(coords, selected_n_clusters_grey)
-    if kmeans is None:
-        return go.Figure(), go.Figure()
-
-    filtered_df['AOI Cluster'] = labels
-
-    # Generate unified cluster colors
-    cluster_colors = generate_cluster_colors(selected_n_clusters_grey)
-
-    # Create Cluster Analysis Figure
-    fig_cluster = go.Figure()
-    fig_cluster.add_trace(go.Scatter(
-        x=coords['NormalizedPointX'],
-        y=coords['NormalizedPointY'],
-        mode='markers',
-        marker=dict(
-            color=[cluster_colors[label] for label in labels],
-            size=5,
-            opacity=0.6
-        ),
-        hoverinfo='skip'
-    ))
-    fig_cluster = add_aoi_visualization_color(
-        fig_cluster, coords, labels, cluster_colors, selected_n_clusters_grey, selected_aoi_type_grey
-    )
-    fig_cluster.add_layout_image(
-        dict(
-            source=image_path_grey,
-            x=0,
-            sizex=width,
-            y=0,
-            sizey=height,
-            xref="x",
-            yref="y",
-            sizing="stretch",
-            opacity=1,
-            layer="below"
-        )
-    )
-    fig_cluster.update_layout(
-        title=dict(
-            text=f'<b>Cluster in {selected_city}</b>',
-            font=dict(size=12, family='Arial, sans-serif', color=title_color)
-        ),
-        margin=dict(l=50, r=30, t=50, b=50),
-        height=525,
-        xaxis=dict(range=[0, width]),
-        yaxis=dict(range=[height, 0]),
-        plot_bgcolor='rgba(0, 0, 0, 0)'
-    )
-    # Scarf-Plot
-    fig_scarf = create_scarf_plot(filtered_df, cluster_colors)
-    fig_scarf.update_layout(
-        title={
-            'text': f'<b>Scarf Plot: AOI Gazed Over Time in {selected_city}</b>',
-            'font': {'size': 12, 'family': 'Arial, sans-serif', 'color': title_color}
-        },
-        xaxis=dict(visible=True, title=None),
-        yaxis=dict(visible=True, title=None),
-        legend_title=dict(
-            text='AOI Cluster',
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        margin=dict(l=50, r=30, t=50, b=50),
-        height=525,
-        legend=dict(
-            orientation='h',
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        plot_bgcolor='rgba(0, 0, 0, 0)',
-        coloraxis_showscale=False
-    )
-
-    return fig_cluster, fig_scarf
-
-
-
-
-"""
------------------------------------------------------------------------------------------
-Section 4:
-4.15.1 - Definition of Cluster Analysis Color Maps
-"""
-@app.callback(
-    [Output('cluster_analysis_map_color_1', 'figure'),
-     Output('scarf_plot_color_map_1', 'figure')],
-    [Input('city_dropdown', 'value'),
-     Input('dropdown_user_color_1', 'value'),
-     Input('selected_n_clusters_color_1', 'value'),
-     Input('selected_aoi_type_color_1', 'value'),
-     Input('current_theme', 'data')]
-)
-def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_color, selected_aoi_type_color, current_theme):
-    title_color = 'black' if current_theme == 'light' else 'white'
-
-    if not selected_city:
-        fig_empty = go.Figure()
-        fig_empty.update_layout(
-            title={
-                'text': "No City Map selected.<br><br>"
-                        "To display the <b>Cluster</b> on a specific map,<br>"
-                        "please select a city from the dropdown on the left.",
-                'y': 0.6,
-                'x': 0.5,
-                'xanchor': 'center',
-                'yanchor': 'middle',
-                'font': {
-                    'size': 14,
-                    'color': title_color,
-                    'family': 'Arial, sans-serif'
-                }
-            },
-            paper_bgcolor='rgba(0, 0, 0, 0)',
-            plot_bgcolor='rgba(0, 0, 0, 0)',
-            xaxis=dict(visible=False),
-            yaxis=dict(visible=False),
-            height=425
-        )
-        return fig_empty, fig_empty
-
-    # Filter data based on user and city selections
-    filtered_df = df[(df['CityMap'] == selected_city) & (df['description'] == 'color')]
-
-    if selected_users:
-        if isinstance(selected_users, str):
-            selected_users = [selected_users]
-        filtered_df = filtered_df[filtered_df['user'].isin(selected_users)]
-
-    # Get image dimensions
-    image_path_color, width, height = get_image_path_color(selected_city)
-    if not (image_path_color and width and height):
-        return go.Figure(), go.Figure()
-
-    # Normalize fixation points within image dimensions
-    filtered_df['NormalizedPointX'] = filtered_df['MappedFixationPointX']
-    filtered_df['NormalizedPointY'] = filtered_df['MappedFixationPointY']
-    filtered_df = filtered_df[
-        (filtered_df['NormalizedPointX'] >= 0) & (filtered_df['NormalizedPointX'] <= width) &
-        (filtered_df['NormalizedPointY'] >= 0) & (filtered_df['NormalizedPointY'] <= height)
-    ]
-
-    if filtered_df.empty:
-        return go.Figure(), go.Figure()
-
-    coords = filtered_df[['NormalizedPointX', 'NormalizedPointY']]
-    kmeans, labels = update_clusters_grey(coords, selected_n_clusters_color)
-    if kmeans is None:
-        return go.Figure(), go.Figure()
-
-    filtered_df['AOI Cluster'] = labels
-    cluster_colors = generate_cluster_colors(selected_n_clusters_color)
-
-    # Create Cluster Analysis Figure
-    fig_cluster = go.Figure()
-    fig_cluster.add_trace(go.Scatter(
-        x=coords['NormalizedPointX'],
-        y=coords['NormalizedPointY'],
-        mode='markers',
-        marker=dict(
-            color=[cluster_colors[label] for label in labels],
-            size=5,
-            opacity=0.6
-        ),
-        hoverinfo='skip',
-        text=[f'Cluster: {label}' for label in labels],
-        name='Fixation Points'
-    ))
-    fig_cluster = add_aoi_visualization_color(
-        fig_cluster, coords, labels, cluster_colors, selected_n_clusters_color, selected_aoi_type_color
-    )
-    fig_cluster.add_layout_image(
-        dict(
-            source=image_path_color,
-            x=0,
-            sizex=width,
-            y=0,
-            sizey=height,
-            xref="x",
-            yref="y",
-            sizing="stretch",
-            opacity=1,
-            layer="below"
-        )
-    )
-
-    fig_cluster.update_layout(
-        title=dict(
-            text=f'<b>Cluster in {selected_city}</b>',
-            font=dict(size=12, family='Arial, sans-serif', color=title_color)
-        ),
-        margin=dict(l=50, r=30, t=50, b=50),
-        height=525,
-        xaxis=dict(range=[0, width], showgrid=False, tickfont=dict(color=title_color)),
-        yaxis=dict(range=[height, 0], showgrid=False, tickfont=dict(color=title_color)),
-        legend_title=dict(
-            text='AOI Cluster',
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        legend=dict(
-            orientation='h',
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-
-        plot_bgcolor='rgba(0, 0, 0, 0)',  # Transparent plot area
-
-    )
-
-    # Create Scarf Plot
-    def create_scarf_plot(df, cluster_colors):
-        if df.empty:
-            return go.Figure().update_layout(
-                title="No data available for the scarf plot.",
-                xaxis=dict(visible=False),
-                yaxis=dict(visible=False)
-            )
-
-        # Berechnung der kumulativen Fixationsdauer
-        df['CumulativeTime'] = df.groupby(['user', 'AOI Cluster'])['Timestamp'].cumsum()
-
-        # Explizite Sortierung der Nutzer und Cluster
-        cluster_order = df['AOI Cluster'].unique()  # Optional: Sortierung nach Namen/ID
-        user_order = sorted(df['user'].unique())  # Optional: Sortierung nach Namen/ID
-
-
-
-        # Scarf-Plot erstellen
-        fig = px.bar(
-            df,
-            x='CumulativeTime',
-            y='user',
-            color='AOI Cluster',
-            color_discrete_map=cluster_colors,
-            barmode='stack',
-            orientation='h',
-            category_orders={
-                'user': user_order,
-                'AOI Cluster': cluster_order
-            }
-        )
-
-        return fig
-
-    # Create the Scarf Plot
-    fig_scarf = create_scarf_plot(filtered_df, cluster_colors)
-
-    # Update the layout for additional customization
-    fig_scarf.update_layout(
-        title={
-            'text': f'<b>Scarf Plot: AOI Gazed Over Time in {selected_city}</b>',
-            'font': {'size': 12, 'family': 'Arial, sans-serif', 'color': title_color}
-        },
-        xaxis=dict(visible=True, title=None),
-        yaxis=dict(visible=True, title=None),
-        legend_title=dict(
-            text='AOI Cluster',  # Title of the legend
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        margin=dict(l=50, r=30, t=50, b=50),
-        height=525,
-        legend=dict(
-            orientation='h',  # Horizontal legend
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        plot_bgcolor='rgba(0, 0, 0, 0)',
-        coloraxis_showscale=False
-        # Transparent background
-    )
-
-    return fig_cluster, fig_scarf
-
-
-
-
-
-"""
------------------------------------------------------------------------------------------
-Section 4:
-4.15.2 - Definition of Cluster Analysis Color Maps
-"""
-@app.callback(
-    [Output('cluster_analysis_map_color_2', 'figure'),
-     Output('scarf_plot_color_map_2', 'figure')],
-    [Input('city_dropdown', 'value'),
-     Input('dropdown_user_color_2', 'value'),
-     Input('selected_n_clusters_color_2', 'value'),
-     Input('selected_aoi_type_color_2', 'value'),
-     Input('current_theme', 'data')]
-)
-def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_color, selected_aoi_type_color, current_theme):
-    title_color = 'black' if current_theme == 'light' else 'white'
-
-    if not selected_city:
-        fig_empty = go.Figure()
-        fig_empty.update_layout(
-            title={
-                'text': "No City Map selected.<br><br>"
-                        "To display the <b>Cluster</b> on a specific map,<br>"
-                        "please select a city from the dropdown on the left.",
-                'y': 0.6,
-                'x': 0.5,
-                'xanchor': 'center',
-                'yanchor': 'middle',
-                'font': {
-                    'size': 14,
-                    'color': title_color,
-                    'family': 'Arial, sans-serif'
-                }
-            },
-            paper_bgcolor='rgba(0, 0, 0, 0)',
-            plot_bgcolor='rgba(0, 0, 0, 0)',
-            xaxis=dict(visible=False),
-            yaxis=dict(visible=False),
-            height=425
-        )
-        return fig_empty, fig_empty
-
-    # Filter data based on user and city selections
-    filtered_df = df[(df['CityMap'] == selected_city) & (df['description'] == 'color')]
-
-    if selected_users:
-        if isinstance(selected_users, str):
-            selected_users = [selected_users]
-        filtered_df = filtered_df[filtered_df['user'].isin(selected_users)]
-
-    # Get image dimensions
-    image_path_color, width, height = get_image_path_color(selected_city)
-    if not (image_path_color and width and height):
-        return go.Figure(), go.Figure()
-
-    # Normalize fixation points within image dimensions
-    filtered_df['NormalizedPointX'] = filtered_df['MappedFixationPointX']
-    filtered_df['NormalizedPointY'] = filtered_df['MappedFixationPointY']
-    filtered_df = filtered_df[
-        (filtered_df['NormalizedPointX'] >= 0) & (filtered_df['NormalizedPointX'] <= width) &
-        (filtered_df['NormalizedPointY'] >= 0) & (filtered_df['NormalizedPointY'] <= height)
-    ]
-
-    if filtered_df.empty:
-        return go.Figure(), go.Figure()
-
-    coords = filtered_df[['NormalizedPointX', 'NormalizedPointY']]
-    kmeans, labels = update_clusters_grey(coords, selected_n_clusters_color)
-    if kmeans is None:
-        return go.Figure(), go.Figure()
-
-    filtered_df['AOI Cluster'] = labels
-    cluster_colors = generate_cluster_colors(selected_n_clusters_color)
-
-    # Create Cluster Analysis Figure
-    fig_cluster = go.Figure()
-    fig_cluster.add_trace(go.Scatter(
-        x=coords['NormalizedPointX'],
-        y=coords['NormalizedPointY'],
-        mode='markers',
-        marker=dict(
-            color=[cluster_colors[label] for label in labels],
-            size=5,
-            opacity=0.6
-        ),
-        hoverinfo='skip',
-        text=[f'Cluster: {label}' for label in labels],
-        name='Fixation Points'
-    ))
-    fig_cluster = add_aoi_visualization_color(
-        fig_cluster, coords, labels, cluster_colors, selected_n_clusters_color, selected_aoi_type_color
-    )
-    fig_cluster.add_layout_image(
-        dict(
-            source=image_path_color,
-            x=0,
-            sizex=width,
-            y=0,
-            sizey=height,
-            xref="x",
-            yref="y",
-            sizing="stretch",
-            opacity=1,
-            layer="below"
-        )
-    )
-
-    fig_cluster.update_layout(
-        title=dict(
-            text=f'<b>Cluster in {selected_city}</b>',
-            font=dict(size=12, family='Arial, sans-serif', color=title_color)
-        ),
-        margin=dict(l=50, r=30, t=50, b=50),
-        height=525,
-        xaxis=dict(range=[0, width], showgrid=False, tickfont=dict(color=title_color)),
-        yaxis=dict(range=[height, 0], showgrid=False, tickfont=dict(color=title_color)),
-        legend_title=dict(
-            text='AOI Cluster',
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        legend=dict(
-            orientation='h',
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-
-        plot_bgcolor='rgba(0, 0, 0, 0)',  # Transparent plot area
-
-    )
-
-    # Create Scarf Plot
-    def create_scarf_plot(df, cluster_colors):
-        if df.empty:
-            return go.Figure().update_layout(
-                title="No data available for the scarf plot.",
-                xaxis=dict(visible=False),
-                yaxis=dict(visible=False)
-            )
-
-        # Berechnung der kumulativen Fixationsdauer
-        df['CumulativeTime'] = df.groupby(['user', 'AOI Cluster'])['Timestamp'].cumsum()
-
-        # Explizite Sortierung der Nutzer und Cluster
-        cluster_order = df['AOI Cluster'].unique()  # Optional: Sortierung nach Namen/ID
-        user_order = sorted(df['user'].unique())  # Optional: Sortierung nach Namen/ID
-
-
-
-        # Scarf-Plot erstellen
-        fig = px.bar(
-            df,
-            x='CumulativeTime',
-            y='user',
-            color='AOI Cluster',
-            color_discrete_map=cluster_colors,
-            barmode='stack',
-            orientation='h',
-            category_orders={
-                'user': user_order,
-                'AOI Cluster': cluster_order
-            }
-        )
-
-        return fig
-
-    # Create the Scarf Plot
-    fig_scarf = create_scarf_plot(filtered_df, cluster_colors)
-
-    # Update the layout for additional customization
-    fig_scarf.update_layout(
-        title={
-            'text': f'<b>Scarf Plot: AOI Gazed Over Time in {selected_city}</b>',
-            'font': {'size': 12, 'family': 'Arial, sans-serif', 'color': title_color}
-        },
-        xaxis=dict(visible=True, title=None),
-        yaxis=dict(visible=True, title=None),
-        legend_title=dict(
-            text='AOI Cluster',  # Title of the legend
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        margin=dict(l=50, r=30, t=50, b=50),
-        height=525,
-        legend=dict(
-            orientation='h',  # Horizontal legend
-            font=dict(size=11, family='Arial, sans-serif', color=title_color)
-        ),
-        plot_bgcolor='rgba(0, 0, 0, 0)',
-        coloraxis_showscale=False
-        # Transparent background
-    )
-
-    return fig_cluster, fig_scarf
 
 
 if __name__ == '__main__':

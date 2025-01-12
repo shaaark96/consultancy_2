@@ -11,7 +11,7 @@ import glob
 import plotly.express as px
 
 # Daten laden und vorbereiten
-data_path = 'assets/all_fixation_data_cleaned_up.csv'  # Korrigieren Sie den Dateipfad
+data_path = '../assets/all_fixation_data_cleaned_up.csv'  # Korrigieren Sie den Dateipfad
 df = pd.read_csv(data_path, sep=';')
 
 # Hinzufügen von "Task Duration in sec" zum DataFrame
