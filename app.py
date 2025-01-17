@@ -49,7 +49,7 @@ app.layout = html.Div([
     # Header and Theme-Mode
     html.Div([
         html.Div([
-            html.H1('Clusterbasiervergleich räumlich zeltlichen Augenbewegungdaten'),
+            html.H1('Clusterbasiervergleich räumlich zeltlichen Augenbewegungsdaten'),
             html.H4('created on behalf of FHGR Chur, last updated: 17.01.2025')],
             className='header'),
         dcc.Dropdown(
@@ -2146,7 +2146,7 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
         y=coords['NormalizedPointY'],
         mode='markers',
         marker=dict(
-            color=[cluster_colors[label] for label in filtered_df['AOI Cluster']],
+            color=[cluster_colors[label] for label in labels],
             size=5,
             opacity=0.6
         ),
@@ -2179,14 +2179,18 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
         ),
         margin=dict(l=50, r=30, t=50, b=50),
         height=525,
-        xaxis=dict(range=[0, width], showgrid=False, tickfont=dict(color=title_color)),
-        yaxis=dict(range=[height, 0], showgrid=False, tickfont=dict(color=title_color)),
+        xaxis=dict(range=[0, width]),
+        yaxis=dict(range=[height, 0]),
         legend_title=dict(
             text='Legend:',
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         legend=dict(
-            orientation='h',
+            orientation='v',  
+            x=1,            
+            xanchor='left',  
+            y=1,              
+            yanchor='top',    
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
 
@@ -2417,7 +2421,9 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
             size=5,
             opacity=0.6
         ),
-        hoverinfo='skip'
+        hoverinfo='skip',
+        text=[f'Cluster: {label}' for label in labels],
+        name='Fixation Points'
     ))
     fig_cluster = add_aoi_visualization_color(
         fig_cluster, coords, labels, cluster_colors, selected_n_clusters_grey, selected_aoi_type_grey
@@ -2450,7 +2456,11 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         legend=dict(
-            orientation='h',
+            orientation='v',  
+            x=1,            
+            xanchor='left',  
+            y=1,              
+            yanchor='top',    
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
 
@@ -2477,7 +2487,7 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         plot_bgcolor='rgba(0, 0, 0, 0)',
-        #coloraxis_showscale=False
+        
     )
 
     return fig_cluster, fig_scarf
@@ -3001,7 +3011,9 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
             size=5,
             opacity=0.6
         ),
-        hoverinfo='skip'
+        hoverinfo='skip',
+        text=[f'Cluster: {label}' for label in labels],
+        name='Fixation Points'
     ))
     fig_cluster = add_aoi_visualization_color(
         fig_cluster, coords, labels, cluster_colors, selected_n_clusters_grey, selected_aoi_type_grey
@@ -3034,7 +3046,11 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         legend=dict(
-            orientation='h',
+            orientation='v',  
+            x=1,            
+            xanchor='left',  
+            y=1,              
+            yanchor='top',    
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
 
@@ -3226,7 +3242,9 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
             size=5,
             opacity=0.6
         ),
-        hoverinfo='skip'
+        hoverinfo='skip',
+        text=[f'Cluster: {label}' for label in labels],
+        name='Fixation Points'
     ))
     fig_cluster = add_aoi_visualization_color(
         fig_cluster, coords, labels, cluster_colors, selected_n_clusters_grey, selected_aoi_type_grey
@@ -3259,7 +3277,11 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         legend=dict(
-            orientation='h',
+            orientation='v',  
+            x=1,            
+            xanchor='left',  
+            y=1,              
+            yanchor='top',    
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
 
@@ -3408,16 +3430,21 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
         ),
         margin=dict(l=50, r=30, t=50, b=50),
         height=525,
-        xaxis=dict(range=[0, width], showgrid=False, tickfont=dict(color=title_color)),
-        yaxis=dict(range=[height, 0], showgrid=False, tickfont=dict(color=title_color)),
+        xaxis=dict(range=[0, width]),
+        yaxis=dict(range=[height, 0]),
         legend_title=dict(
             text='Legend:',
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         legend=dict(
-            orientation='h',
+            orientation='v',  
+            x=1,            
+            xanchor='left',  
+            y=1,              
+            yanchor='top',    
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
+
 
         plot_bgcolor='rgba(0, 0, 0, 0)',  # Transparent plot area
 
@@ -3602,16 +3629,21 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
         ),
         margin=dict(l=50, r=30, t=50, b=50),
         height=525,
-        xaxis=dict(range=[0, width], showgrid=False, tickfont=dict(color=title_color)),
-        yaxis=dict(range=[height, 0], showgrid=False, tickfont=dict(color=title_color)),
+        xaxis=dict(range=[0, width]),
+        yaxis=dict(range=[height, 0]),
         legend_title=dict(
             text='Legend:',
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         legend=dict(
-            orientation='h',
+            orientation='v',  
+            x=1,            
+            xanchor='left',  
+            y=1,              
+            yanchor='top',    
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
+
 
         plot_bgcolor='rgba(0, 0, 0, 0)',  # Transparent plot area
 
@@ -3682,4 +3714,6 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, use_reloader=False, port=8051)
+
+print("Öffne das Dashboard unter: http://127.0.0.1:8051")
