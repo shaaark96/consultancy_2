@@ -49,8 +49,8 @@ app.layout = html.Div([
     # Header and Theme-Mode
     html.Div([
         html.Div([
-            html.H1('Analysis of Eye-Tracking-Data'),
-            html.H4('created on behalf of FHGR Chur, last updated: 20.06.2024')],
+            html.H1('Clusterbasiervergleich räumlich zeltlichen Augenbewegungdaten'),
+            html.H4('created on behalf of FHGR Chur, last updated: 17.01.2025')],
             className='header'),
         dcc.Dropdown(
             id='theme_dropdown',
@@ -77,11 +77,11 @@ app.layout = html.Div([
                     html.Button('Boxplot', id='default_viz', n_clicks=0, className='viz_button'),
                     html.Button('Heat Map', id='heat_map', n_clicks=0, className='viz_button'),
                     html.Button('Gazeplot', id='gaze_plot', n_clicks=0, className='viz_button'),
+                    html.Button('Opacity Map', id='opacity_map', n_clicks=0, className='viz_button'),
                     html.Button('Correlation', id='scatter_plot', n_clicks=0, className='viz_button'),
                     html.Button('Cluster Analysis', id='cluster_analysis', n_clicks=0, className='viz_button'),
                     html.Button('Cluster Analysis Color', id='cluster_analysis_map_color', n_clicks=0, className='viz_button'),
-                    html.Button('Cluster Analysis Grey', id='cluster_analysis_map_grey', n_clicks=0, className='viz_button'),
-                    html.Button('Opacity Map', id='opacity_map', n_clicks=0, className='viz_button'),
+                    html.Button('Cluster Analysis Grey', id='cluster_analysis_map_grey', n_clicks=0, className='viz_button'),                    
                 ], id='button_viz_type', className='button_viz_type'),
                 dcc.Store(id='active-button', data='default_viz'),
                 html.Div(id='output-section'),
@@ -210,21 +210,21 @@ def update_active_button(btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, active_
 )
 def update_output(active_button):
     if active_button == 'default_viz':
-        return 'This is the default visualization showing an overview of the data.'
+        return 'Dies ist die Standardvisualisierung, die die Verteilung der Daten vergleicht zwischen der unabhängigen Variable (Fabige vs schwarz/weiss Karte).'
     elif active_button == 'heat_map':
-        return 'The heat map visualization highlights areas with the highest user attention.'
+        return 'Die Heatmap-Visualisierung hebt die Bereiche mit der höchsten Nutzeraufmerksamkeit hervor.'
     elif active_button == 'gaze_plot':
-        return 'The gaze plot shows the path and duration of users’ fixations over the map.'
+        return 'Der Gaze-Plot zeigt den Weg und die Dauer (Kreisgrösse) der Blickewege (Linien) der Nutzer auf der Karte.'
     elif active_button == 'scatter_plot':
-        return 'The scatter plot provides a correlation analysis between different variables.'
+        return 'Das Streudiagramm liefert eine Korrelationsanalyse zwischen Fixationsdauer und Sakadenlänge.'
     elif active_button == 'cluster_analysis':
-        return 'Cluster analysis helps identify patterns by grouping similar data points together.'
+        return 'Die Clusteranalyse hilft bei der Erkennung von Mustern, indem sie ähnliche Datenpunkte zusammenfasst. Hier wird die unabhängigen Variable (Fabige vs schwarz/weiss Karte) verglichen. '
     elif active_button == 'opacity_map':
-        return 'Opacity map eye tracking involves using varying levels of transparency in a visual overlay to guide and analyze gaze patterns on a screen or interface.'
+        return 'Die Opacity-Map viusalisiert verschiedene Transparenzstufen in einem visuellen Overlay, um Blickmuster auf einem Bildschirm oder einer Schnittstelle zu lenken und zu analysieren.'
     elif active_button == 'cluster_analysis_map_color':
-        return 'Cluster analysis helps identify patterns by grouping similar data points together'
+        return 'Die Clusteranalyse hilft bei der Erkennung von Mustern, indem sie ähnliche Datenpunkte zusammenfasst. Hier wird die farbige Karte verglichen.'
     elif active_button == 'cluster_analysis_map_grey':
-        return 'Cluster analysis helps identify patterns by grouping similar data points together'
+        return 'Die Clusteranalyse hilft bei der Erkennung von Mustern, indem sie ähnliche Datenpunkte zusammenfasst. Hier wird die schwarz/weiss Karte verglichen.'
     else:
         return 'Select a visualization type to see its details here.'
 
@@ -301,7 +301,7 @@ def update_plot_area(visualization_type, selected_city):
             dcc.Graph(id='scarf_plot_color_map_1'),
             html.Label("Number of clusters:"),
             dcc.Input(id='selected_n_clusters_color_1', type='number', value=3, min=1, step=1),
-            dcc.Dropdown(id='dropdown_user_color_1', value=None, multi=True, placeholder='Filter by User(s)...'),
+            dcc.Dropdown(id='dropdown_user_color', value=None, multi=True, placeholder='Filter by User(s)...'),
             dcc.Dropdown(
                 id='selected_aoi_type_color_1',
                 options=[
@@ -315,7 +315,7 @@ def update_plot_area(visualization_type, selected_city):
             dcc.Graph(id='scarf_plot_color_map_2'),
             html.Label("Number of clusters:"),
             dcc.Input(id='selected_n_clusters_color_2', type='number', value=3, min=1, step=1),
-            dcc.Dropdown(id='dropdown_user_color_2', value=None, multi=True, placeholder='Filter by User(s)...'),
+            dcc.Dropdown(id='dropdown_user_color', value=None, multi=True, placeholder='Filter by User(s)...'),
             dcc.Dropdown(
                 id='selected_aoi_type_color_2',
                 options=[
@@ -2174,7 +2174,7 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
 
     fig_cluster.update_layout(
         title=dict(
-            text=f'<b>Cluster in {selected_city}</b>',
+            text=f'<b>Cluster fabrigen Karte: {selected_city}</b>',
             font=dict(size=12, family='Arial, sans-serif', color=title_color)
         ),
         margin=dict(l=50, r=30, t=50, b=50),
@@ -2182,7 +2182,7 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
         xaxis=dict(range=[0, width], showgrid=False, tickfont=dict(color=title_color)),
         yaxis=dict(range=[height, 0], showgrid=False, tickfont=dict(color=title_color)),
         legend_title=dict(
-            text='AOI Cluster',
+            text='Legend:',
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         legend=dict(
@@ -2250,7 +2250,7 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         plot_bgcolor='rgba(0, 0, 0, 0)',
-        coloraxis_showscale=False
+        #coloraxis_showscale=False
         # Transparent background
     )
 
@@ -2438,14 +2438,24 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
     )
     fig_cluster.update_layout(
         title=dict(
-            text=f'<b>Cluster in {selected_city}</b>',
+            text=f'<b>Cluster der schawar/weiss Karte in {selected_city}</b>',
             font=dict(size=12, family='Arial, sans-serif', color=title_color)
         ),
         margin=dict(l=50, r=30, t=50, b=50),
         height=525,
         xaxis=dict(range=[0, width]),
         yaxis=dict(range=[height, 0]),
-        plot_bgcolor='rgba(0, 0, 0, 0)'
+        legend_title=dict(
+            text='Legend:',
+            font=dict(size=11, family='Arial, sans-serif', color=title_color)
+        ),
+        legend=dict(
+            orientation='h',
+            font=dict(size=11, family='Arial, sans-serif', color=title_color)
+        ),
+
+        plot_bgcolor='rgba(0, 0, 0, 0)',  # Transparent plot area
+
     )
     # Scarf-Plot
     fig_scarf = create_scarf_plot(filtered_df, cluster_colors)
@@ -2467,7 +2477,7 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         plot_bgcolor='rgba(0, 0, 0, 0)',
-        coloraxis_showscale=False
+        #coloraxis_showscale=False
     )
 
     return fig_cluster, fig_scarf
@@ -3012,14 +3022,24 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
     )
     fig_cluster.update_layout(
         title=dict(
-            text=f'<b>Cluster in {selected_city}</b>',
+            text=f'<b>Cluster der schwarz/weiss Karte: {selected_city}</b>',
             font=dict(size=12, family='Arial, sans-serif', color=title_color)
         ),
         margin=dict(l=50, r=30, t=50, b=50),
         height=525,
         xaxis=dict(range=[0, width]),
         yaxis=dict(range=[height, 0]),
-        plot_bgcolor='rgba(0, 0, 0, 0)'
+        legend_title=dict(
+            text='Legend:',
+            font=dict(size=11, family='Arial, sans-serif', color=title_color)
+        ),
+        legend=dict(
+            orientation='h',
+            font=dict(size=11, family='Arial, sans-serif', color=title_color)
+        ),
+
+        plot_bgcolor='rgba(0, 0, 0, 0)',  # Transparent plot area
+
     )
     # Scarf-Plot
     fig_scarf = create_scarf_plot(filtered_df, cluster_colors)
@@ -3041,7 +3061,7 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         plot_bgcolor='rgba(0, 0, 0, 0)',
-        coloraxis_showscale=False
+        #coloraxis_showscale=False
     )
 
     return fig_cluster, fig_scarf
@@ -3227,14 +3247,24 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
     )
     fig_cluster.update_layout(
         title=dict(
-            text=f'<b>Cluster in {selected_city}</b>',
+            text=f'<b>Cluster der schwarz/weiss Karte: {selected_city}</b>',
             font=dict(size=12, family='Arial, sans-serif', color=title_color)
         ),
         margin=dict(l=50, r=30, t=50, b=50),
         height=525,
         xaxis=dict(range=[0, width]),
         yaxis=dict(range=[height, 0]),
-        plot_bgcolor='rgba(0, 0, 0, 0)'
+        legend_title=dict(
+            text='Legend:',
+            font=dict(size=11, family='Arial, sans-serif', color=title_color)
+        ),
+        legend=dict(
+            orientation='h',
+            font=dict(size=11, family='Arial, sans-serif', color=title_color)
+        ),
+
+        plot_bgcolor='rgba(0, 0, 0, 0)',  # Transparent plot area
+
     )
     # Scarf-Plot
     fig_scarf = create_scarf_plot(filtered_df, cluster_colors)
@@ -3256,7 +3286,7 @@ def cluster_analysis_grey(selected_city, selected_users, selected_n_clusters_gre
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         plot_bgcolor='rgba(0, 0, 0, 0)',
-        coloraxis_showscale=False
+        #coloraxis_showscale=False
     )
 
     return fig_cluster, fig_scarf
@@ -3273,7 +3303,7 @@ Section 4:
     [Output('cluster_analysis_map_color_1', 'figure'),
      Output('scarf_plot_color_map_1', 'figure')],
     [Input('city_dropdown', 'value'),
-     Input('dropdown_user_color_1', 'value'),
+     Input('dropdown_user_color', 'value'),
      Input('selected_n_clusters_color_1', 'value'),
      Input('selected_aoi_type_color_1', 'value'),
      Input('current_theme', 'data')]
@@ -3373,7 +3403,7 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
 
     fig_cluster.update_layout(
         title=dict(
-            text=f'<b>Cluster in {selected_city}</b>',
+            text=f'<b>Cluster der farbigen Karte: {selected_city}</b>',
             font=dict(size=12, family='Arial, sans-serif', color=title_color)
         ),
         margin=dict(l=50, r=30, t=50, b=50),
@@ -3381,7 +3411,7 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
         xaxis=dict(range=[0, width], showgrid=False, tickfont=dict(color=title_color)),
         yaxis=dict(range=[height, 0], showgrid=False, tickfont=dict(color=title_color)),
         legend_title=dict(
-            text='AOI Cluster',
+            text='Legend:',
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         legend=dict(
@@ -3440,18 +3470,16 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
         xaxis=dict(visible=True, title=None),
         yaxis=dict(visible=True, title=None),
         legend_title=dict(
-            text='AOI Cluster',  # Title of the legend
+            text='Legend:',
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
-        margin=dict(l=50, r=30, t=50, b=50),
-        height=525,
         legend=dict(
-            orientation='h',  # Horizontal legend
+            orientation='h',
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
-        plot_bgcolor='rgba(0, 0, 0, 0)',
-        coloraxis_showscale=False
-        # Transparent background
+
+        plot_bgcolor='rgba(0, 0, 0, 0)',  # Transparent plot area
+        #coloraxis_showscale=False
     )
 
     return fig_cluster, fig_scarf
@@ -3469,7 +3497,7 @@ Section 4:
     [Output('cluster_analysis_map_color_2', 'figure'),
      Output('scarf_plot_color_map_2', 'figure')],
     [Input('city_dropdown', 'value'),
-     Input('dropdown_user_color_2', 'value'),
+     Input('dropdown_user_color', 'value'),
      Input('selected_n_clusters_color_2', 'value'),
      Input('selected_aoi_type_color_2', 'value'),
      Input('current_theme', 'data')]
@@ -3569,7 +3597,7 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
 
     fig_cluster.update_layout(
         title=dict(
-            text=f'<b>Cluster in {selected_city}</b>',
+            text=f'<b>Cluster der farbigen Karte: {selected_city}</b>',
             font=dict(size=12, family='Arial, sans-serif', color=title_color)
         ),
         margin=dict(l=50, r=30, t=50, b=50),
@@ -3577,7 +3605,7 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
         xaxis=dict(range=[0, width], showgrid=False, tickfont=dict(color=title_color)),
         yaxis=dict(range=[height, 0], showgrid=False, tickfont=dict(color=title_color)),
         legend_title=dict(
-            text='AOI Cluster',
+            text='Legend:',
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         legend=dict(
@@ -3646,7 +3674,7 @@ def cluster_analysis_color(selected_city, selected_users, selected_n_clusters_co
             font=dict(size=11, family='Arial, sans-serif', color=title_color)
         ),
         plot_bgcolor='rgba(0, 0, 0, 0)',
-        coloraxis_showscale=False
+        #coloraxis_showscale=False
         # Transparent background
     )
 
