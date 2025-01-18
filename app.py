@@ -699,7 +699,7 @@ def get_image_path_color(selected_city):
         image_path = matching_files[0]
         img = Image.open(image_path)
         width, height = img.size
-        return 'http://127.0.0.1:8050/' + image_path, width, height
+        return 'http://127.0.0.1:8051/' + image_path, width, height
     return None, None, None
 
 
@@ -874,7 +874,7 @@ def get_image_path_grey(selected_city):
         image_path = matching_files[0]
         img = Image.open(image_path)
         width, height = img.size
-        return 'http://127.0.0.1:8050/' + image_path, width, height
+        return 'http://127.0.0.1:8051/' + image_path, width, height
     return None, None, None
 
 @app.callback(
